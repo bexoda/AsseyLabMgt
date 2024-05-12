@@ -1,0 +1,169 @@
+﻿@model IEnumerable<AsseyLabMgt.Models.LabRequest>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary"><i class="fa fa-plus"></i> Add New Lab Request</a>
+</p>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Lab Requests List</h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <table id="example1" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.JobNumber)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ProductionDate)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Client)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Department)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PlantSource)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Description)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.NumberOfSamples)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.DeliveredBy)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ReceivedBy)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TimeReceived)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.PreparedBy)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.WeighedBy)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.DigestedBy)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TitratedBy)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.DateReported)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.EnteredBy)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TimePreoared)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CreatedDate)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.UpdatedDate)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.IsActive)
+                    </th>
+                    <th>Edit</th>
+                    <th>View</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.JobNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Date)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ProductionDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Client.ClientCode)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Department.DeptCode)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PlantSource.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Description)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.NumberOfSamples)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DeliveredBy.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ReceivedBy.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TimeReceived)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PreparedBy.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.WeighedBy.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DigestedBy.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TitratedBy.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DateReported)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.EnteredBy.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TimePreoared)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CreatedDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.UpdatedDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IsActive)
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary"><i class="fa fa-pen"></i> Edit</a>
+                        </td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-warning"><i class="fa fa-eye"></i> Details</a>
+                        </td>
+                        <td>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "intl-tel-input@23.0.1",
+      "destination": "wwwroot/lib/intl-tel-input/"
+    }
+  ]
+}

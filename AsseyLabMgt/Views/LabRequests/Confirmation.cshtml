@@ -1,0 +1,81 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+    @vi
+*@
+
+@{
+    ViewData["Title"] = "Confirm Lab Request";
+}
+
+<h1>Confirm Lab Request</h1>
+
+<h4>LabRequest Details</h4>
+<hr />
+<div class="row">
+    <div class="col-md-8">
+        <dl class="row">
+            <dt class="col-sm-4">Job Number:</dt>
+            <dd class="col-sm-8">@Model.JobNumber</dd>
+
+            <dt class="col-sm-4">Date:</dt>
+            <dd class="col-sm-8">@Model.Date.ToShortDateString()</dd>
+
+            <dt class="col-sm-4">Production Date:</dt>
+            <dd class="col-sm-8">@Model.ProductionDate.ToShortDateString()</dd>
+
+            <dt class="col-sm-4">Description:</dt>
+            <dd class="col-sm-8">@Model.Description</dd>
+
+            <!-- Include other fields as necessary -->
+        </dl>
+    </div>
+</div>
+
+<h4>Excel Data Preview</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Sample ID</th>
+            <th>Mn</th>
+            <th>Sol_Mn</th>
+            <!-- Other columns -->
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in ViewBag.LabResults as List<AsseyLabMgt.Models.LabResults>)
+        {
+            <tr>
+                <td>@item.SampleId</td>
+                <td>@item.Mn</td>
+                <td>@item.Sol_Mn</td>
+                <td>@item.Fe</td>
+                <td>@item.B</td>
+                <td>@item.MnO2</td>
+                <td>@item.SiO2</td>
+                <td>@item.Al2O3</td>
+                <td>@item.MgO</td>
+                <td>@item.CaO</td>
+                <td>@item.Au</td>
+                <td>@item.H2O</td>
+                <td>@item.Mg</td>
+                <td>@item.CreatedDate.ToString("MM/dd/yyyy")</td>
+                <td>@item.IsActive ? "Active" : "Inactive"</td>
+            </tr>
+
+        }
+    </tbody>
+</table>
+
+<form asp-action="FinalizeConfirmation" method="post">
+    <button type="submit" class="btn btn-success">Confirm and Submit</button>
+</form>
+
+<div>
+    <a asp-action="Create">Back to Edit</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

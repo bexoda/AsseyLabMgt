@@ -1,0 +1,117 @@
+﻿@model AsseyLabMgt.Models.LabRequest
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>LabRequest</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+          @*   <div class="form-group">
+                <label asp-for="JobNumber" class="control-label"></label>
+                <input asp-for="JobNumber" class="form-control" readonly value="@Convert.ToString(ViewData["JobNumber"])" />
+                <input type="hidden" asp-for="JobNumber" />
+                <span asp-validation-for="JobNumber" class="text-danger"></span>
+            </div> *@
+
+            <div class="form-group">
+                <label asp-for="Date" class="control-label"></label>
+                <input asp-for="Date" class="form-control" />
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductionDate" class="control-label"></label>
+                <input asp-for="ProductionDate" class="form-control" />
+                <span asp-validation-for="ProductionDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ClientId" class="control-label"></label>
+                <select asp-for="ClientId" class="form-control" asp-items="ViewBag.ClientId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="DepartmentId" class="control-label"></label>
+                <select asp-for="DepartmentId" class="form-control" asp-items="ViewBag.DepartmentId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="PlantSourceId" class="control-label"></label>
+                <select asp-for="PlantSourceId" class="form-control" asp-items="ViewBag.PlantSourceId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NumberOfSamples" class="control-label"></label>
+                <input asp-for="NumberOfSamples" class="form-control" />
+                <span asp-validation-for="NumberOfSamples" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DeliveredById" class="control-label"></label>
+                <select asp-for="DeliveredById" class="form-control" asp-items="ViewBag.DeliveredById"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="ReceivedById" class="control-label"></label>
+                <select asp-for="ReceivedById" class="form-control" asp-items="ViewBag.ReceivedById"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="TimeReceived" class="control-label"></label>
+                <input asp-for="TimeReceived" class="form-control" />
+                <span asp-validation-for="TimeReceived" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PreparedById" class="control-label"></label>
+                <select asp-for="PreparedById" class="form-control" asp-items="ViewBag.PreparedById"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="WeighedById" class="control-label"></label>
+                <select asp-for="WeighedById" class="form-control" asp-items="ViewBag.WeighedById"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="DigestedById" class="control-label"></label>
+                <select asp-for="DigestedById" class="form-control" asp-items="ViewBag.DigestedById"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="TitratedById" class="control-label"></label>
+                <select asp-for="TitratedById" class="form-control" asp-items="ViewBag.TitratedById"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="DateReported" class="control-label"></label>
+                <input asp-for="DateReported" class="form-control" />
+                <span asp-validation-for="DateReported" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EnteredById" class="control-label"></label>
+                <select asp-for="EnteredById" class="form-control" asp-items="ViewBag.EnteredById"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="TimePreoared" class="control-label"></label>
+                <input asp-for="TimePreoared" class="form-control" />
+                <span asp-validation-for="TimePreoared" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="excelFile">Upload Excel File</label>
+                <input type="file" class="form-control" id="excelFile" name="excelFile" accept=".xlsx, .xls">
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

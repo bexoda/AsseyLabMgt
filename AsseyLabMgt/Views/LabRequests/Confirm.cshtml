@@ -1,0 +1,124 @@
+﻿@model AsseyLabMgt.Models.ConfirmationViewModel
+
+@{
+    ViewData["Title"] = "Confirm Lab Request";
+}
+
+<h1>Confirm Lab Request</h1>
+
+<h4>LabRequest Details</h4>
+<hr />
+<div class="row">
+    <div class="col-md-8">
+        <dl class="row">
+            <dt class="col-sm-4">Job Number:</dt>
+            <dd class="col-sm-8">
+                <input class="form-control" type="text" value="@Model.LabRequest.JobNumber" readonly />
+            </dd>
+
+            <dt class="col-sm-4">Date:</dt>
+            <dd class="col-sm-8">
+                <input class="form-control" type="text" value="@Model.LabRequest.Date.ToShortDateString()" readonly />
+            </dd>
+
+            <dt class="col-sm-4">Production Date:</dt>
+            <dd class="col-sm-8">
+                <input class="form-control" type="text" value="@Model.LabRequest.ProductionDate.ToShortDateString()" readonly />
+            </dd>
+
+            <dt class="col-sm-4">Description:</dt>
+            <dd class="col-sm-8">
+                <input class="form-control" type="text" value="@Model.LabRequest.Description" readonly />
+            </dd>
+
+            <dt class="col-sm-4">Client ID:</dt>
+            <dd class="col-sm-8">
+                <input class="form-control" type="text" value="@Model.LabRequest.ClientId" readonly />
+            </dd>
+
+            <dt class="col-sm-4">Department ID:</dt>
+            <dd class="col-sm-8">
+                <input class="form-control" type="text" value="@Model.LabRequest.DepartmentId" readonly />
+            </dd>
+
+            <dt class="col-sm-4">Plant Source ID:</dt>
+            <dd class="col-sm-8">
+                <input class="form-control" type="text" value="@Model.LabRequest.PlantSourceId" readonly />
+            </dd>
+
+            <dt class="col-sm-4">Number of Samples:</dt>
+            <dd class="col-sm-8">
+                <input class="form-control" type="text" value="@Model.LabRequest.NumberOfSamples" readonly />
+            </dd>
+
+
+        </dl>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">LabRequests List</h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <table id="example1" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Sample ID</th>
+                    <th>Mn</th>
+                    <th>Sol_Mn</th>
+                    <th>Fe</th>
+                    <th>B</th>
+                    <th>MnO2</th>
+                    <th>SiO2</th>
+                    <th>Al2O3</th>
+                    <th>MgO</th>
+                    <th>CaO</th>
+                    <th>Au</th>
+                    <th>H2O</th>
+                    <th>Mg</th>
+                    <th>Created Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.LabResults)
+                {
+                    <tr>
+                        <td>@item.SampleId</td>
+                        <td>@item.Mn</td>
+                        <td>@item.Sol_Mn</td>
+                        <td>@item.Fe</td>
+                        <td>@item.B</td>
+                        <td>@item.MnO2</td>
+                        <td>@item.SiO2</td>
+                        <td>@item.Al2O3</td>
+                        <td>@item.MgO</td>
+                        <td>@item.CaO</td>
+                        <td>@item.Au</td>
+                        <td>@item.H2O</td>
+                        <td>@item.Mg</td>
+                        <td>@item.CreatedDate.ToString("MM/dd/yyyy")</td>
+                        <td>@(item.IsActive ? "Active" : "Inactive")</td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    </div>
+</div>
+
+<form asp-action="FinalizeConfirmation" method="post">
+    <button type="submit" class="btn btn-success">Confirm and Submit</button>
+</form>
+
+<div>
+    <a asp-action="Create">Back to Edit</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,4 +1,5 @@
 ﻿using AsseyLabMgt.Data;
+using AsseyLabMgt.Models;
 using AsseyLabMgt.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,13 +9,13 @@ namespace AsseyLabMgt.Controllers
 {
     public class RolesController : Controller
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly SignInManager<AppUser> _signInManager;
         private readonly ApplicationDbContext _context;
 
-        public RolesController(UserManager<IdentityUser> userManager, ApplicationDbContext context,
-            RoleManager<IdentityRole> roleManager, SignInManager<IdentityUser> signInManager)
+        public RolesController(UserManager<AppUser> userManager, ApplicationDbContext context,
+            RoleManager<IdentityRole> roleManager, SignInManager<AppUser> signInManager)
         {
             _context = context;
             _userManager = userManager;

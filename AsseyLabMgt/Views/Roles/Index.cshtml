@@ -28,7 +28,7 @@
 
                     <th>Edit</th>
                     <th>View</th>
-                    <th>Delete</th>
+                    @* <th>Delete</th> *@
                 </tr>
             </thead>
             <tbody>
@@ -49,9 +49,9 @@
                         <td>
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-warning"><i class="fa fa-eye"></i> Details</a>
                         </td>
-                        <td>
+                      @*   <td>
                             <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
-                        </td>
+                        </td> *@
                     </tr>
                 }
             </tbody>

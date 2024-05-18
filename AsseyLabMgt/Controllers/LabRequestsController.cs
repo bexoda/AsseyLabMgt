@@ -88,7 +88,11 @@ namespace AsseyLabMgt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(LabRequest labRequest, IFormFile excelFile)
         {
-            labRequest.CreatedDate = DateTime.Now;
+            labRequest.CreatedDate = DateTime.UtcNow;
+            labRequest.ProductionDate = labRequest.ProductionDate.ToUniversalTime();
+            labRequest.DateReported = labRequest.DateReported.ToUniversalTime();
+            labRequest.ProductionDate = labRequest.ProductionDate.ToUniversalTime();
+            labRequest.Date = labRequest.Date.ToUniversalTime();
             labRequest.IsActive = true;
 
             // Generate JobNumber as a long integer from DateTime
@@ -154,13 +158,15 @@ namespace AsseyLabMgt.Controllers
                             MnO2 = worksheet.Row(row).Cell(6).GetValue<decimal>(),
                             SiO2 = worksheet.Row(row).Cell(7).GetValue<decimal>(),
                             Al2O3 = worksheet.Row(row).Cell(8).GetValue<decimal>(),
-                            MgO = worksheet.Row(row).Cell(9).GetValue<decimal>(),
-                            CaO = worksheet.Row(row).Cell(10).GetValue<decimal>(),
-                            Au = worksheet.Row(row).Cell(11).GetValue<decimal>(),
-                            H2O = worksheet.Row(row).Cell(12).GetValue<decimal>(),
-                            Mg = worksheet.Row(row).Cell(13).GetValue<decimal>(),
+                            P = worksheet.Row(row).Cell(9).GetValue<decimal>(),
+                            MgO = worksheet.Row(row).Cell(10).GetValue<decimal>(),
+                            CaO = worksheet.Row(row).Cell(11).GetValue<decimal>(),
+                            Au = worksheet.Row(row).Cell(12).GetValue<decimal>(),
+                            As = worksheet.Row(row).Cell(13).GetValue<decimal>(),
+                            H2O = worksheet.Row(row).Cell(14).GetValue<decimal>(),
+                            Mg = worksheet.Row(row).Cell(15).GetValue<decimal>(),
 
-                            CreatedDate = DateTime.Now,
+                            CreatedDate = DateTime.UtcNow,
                             IsActive = true
                         };
 

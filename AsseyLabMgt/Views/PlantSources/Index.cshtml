@@ -23,9 +23,7 @@
                     @Html.DisplayNameFor(model => model.PlantSourceDescription)
             </th>
 
-            <th>
-                    @Html.DisplayNameFor(model => model.IsActive)
-            </th>
+            
             <th>Edit</th>
             <th>View</th>
             <th>Delete</th>
@@ -42,9 +40,7 @@
                             @Html.DisplayFor(modelItem => item.PlantSourceDescription)
                         </td>
 
-                        <td>
-                            @Html.DisplayFor(modelItem => item.IsActive)
-                        </td>
+                 
                         <td>
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary"><i class="fa fa-pen"></i> Edit</a>
                         </td>

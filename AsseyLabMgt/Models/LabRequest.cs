@@ -60,5 +60,6 @@ public class LabRequest
     public DateTime CreatedDate { get; set; } = DateTime.Now;
     public DateTime? UpdatedDate { get; set; }
     public bool IsActive { get; set; } = false;
+    public ICollection<LabResults> LabResults { get; set; } // Navigation property for related LabResults
 
 }

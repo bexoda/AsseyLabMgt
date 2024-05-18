@@ -59,17 +59,31 @@ namespace AsseyLabMgt.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Staff staff)
+        public async Task<IActionResult> Create( Staff staff)
         {
-            if (ModelState.IsValid)
+            // Assuming you have FirstName and LastName, and you want to compute FullName
+            if (!string.IsNullOrEmpty(staff.Firstname) && !string.IsNullOrEmpty(staff.Surname))
             {
+                staff.Fullname = $"{staff.Firstname} {staff.Surname}";
+            }
+
+            // Optionally, you can manually add model errors based on custom logic
+            if (string.IsNullOrEmpty(staff.Fullname))
+            {
+                ModelState.AddModelError("FullName", "Full name cannot be empty.");
+            }
+            staff.CreatedDate = DateTime.UtcNow;
+
+            //if (ModelState.IsValid)
+            //{
                 _context.Add(staff);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
-            }
+            //}
 
             return View(staff);
         }
+
 
         // GET: Staffs/Edit/5
         public async Task<IActionResult> Edit(int? id)

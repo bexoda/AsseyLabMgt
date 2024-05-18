@@ -1,0 +1,103 @@
+﻿@model AsseyLabMgt.Models.ReportViewModel
+
+@{
+    ViewData["Title"] = "Geology Report";
+}
+
+<h1>Geology Report</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input type="date" class="form-control" id="startDate" name="StartDate" asp-for="StartDate" required />
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input type="date" class="form-control" id="endDate" name="EndDate" asp-for="EndDate" required />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <form id="geologyReportForm" asp-action="Generate" method="post">
+            <input type="hidden" name="StartDate" id="geoStartDate" />
+            <input type="hidden" name="EndDate" id="geoEndDate" />
+            <button type="submit" class="btn btn-primary btn-block">
+                <i class="fas fa-chart-line"></i> Generate Geology Report
+            </button>
+        </form>
+    </div>
+    <div class="col-md-6">
+        <form id="samplesReceivedReportForm" asp-action="GenerateSamplesReceived" method="post">
+            <input type="hidden" name="StartDate" id="samplesStartDate" />
+            <input type="hidden" name="EndDate" id="samplesEndDate" />
+            <button type="submit" class="btn btn-success btn-block">
+                <i class="fas fa-flask"></i> Generate Samples Received Report
+            </button>
+        </form>
+    </div>
+</div>
+<div class="row mt-2">
+    <div class="col-md-6">
+        <form id="yearToDateSamplesReceivedReportForm" asp-action="GenerateYearToDateSamplesReceived" method="post">
+            <input type="hidden" name="StartDate" id="yearToDateStartDate" />
+            <input type="hidden" name="EndDate" id="yearToDateEndDate" />
+            <button type="submit" class="btn btn-warning btn-block">
+                <i class="fas fa-calendar-alt"></i> Generate Year-To-Date Samples Received Report
+            </button>
+        </form>
+    </div>
+    <div class="col-md-6">
+        <form id="yearToDateAnalysisStatisticsReportForm" asp-action="GenerateYearToDateAnalysisStatistics" method="post">
+            <input type="hidden" name="StartDate" id="yearToDateAnalysisStartDate" />
+            <input type="hidden" name="EndDate" id="yearToDateAnalysisEndDate" />
+            <button type="submit" class="btn btn-info btn-block">
+                <i class="fas fa-chart-bar"></i> Generate Year-To-Date Analysis Statistics Report
+            </button>
+        </form>
+    </div>
+</div>
+<div class="row mt-2">
+    <div class="col-md-6">
+        <form id="metReportForm" asp-action="GenerateMetReport" method="post">
+            <input type="hidden" name="StartDate" id="metStartDate" />
+            <input type="hidden" name="EndDate" id="metEndDate" />
+            <button type="submit" class="btn btn-danger btn-block">
+                <i class="fas fa-chart-pie"></i> Generate Met Report
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('geologyReportForm').addEventListener('submit', function () {
+            document.getElementById('geoStartDate').value = document.getElementById('startDate').value;
+            document.getElementById('geoEndDate').value = document.getElementById('endDate').value;
+        });
+
+        document.getElementById('samplesReceivedReportForm').addEventListener('submit', function () {
+            document.getElementById('samplesStartDate').value = document.getElementById('startDate').value;
+            document.getElementById('samplesEndDate').value = document.getElementById('endDate').value;
+        });
+
+        document.getElementById('yearToDateSamplesReceivedReportForm').addEventListener('submit', function () {
+            document.getElementById('yearToDateStartDate').value = document.getElementById('startDate').value;
+            document.getElementById('yearToDateEndDate').value = document.getElementById('endDate').value;
+        });
+
+        document.getElementById('yearToDateAnalysisStatisticsReportForm').addEventListener('submit', function () {
+            document.getElementById('yearToDateAnalysisStartDate').value = document.getElementById('startDate').value;
+            document.getElementById('yearToDateAnalysisEndDate').value = document.getElementById('endDate').value;
+        });
+
+        document.getElementById('metReportForm').addEventListener('submit', function () {
+            document.getElementById('metStartDate').value = document.getElementById('startDate').value;
+            document.getElementById('metEndDate').value = document.getElementById('endDate').value;
+        });
+    </script>
+}

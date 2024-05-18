@@ -92,7 +92,7 @@ namespace AsseyLabMgt.Controllers
                         FirstName = model.FirstName,
                         LastName = model.Surname,
                         OtherName = model.OtherName,
-                        CreatedOn = DateTime.Now,
+                        CreatedOn = DateTime.UtcNow,
                         CreatdBy = "Ben",
                         UserName = model.UserName,
                         Email = model.Email,

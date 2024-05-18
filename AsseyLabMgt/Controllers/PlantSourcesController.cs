@@ -57,7 +57,7 @@ namespace AsseyLabMgt.Controllers
         public async Task<IActionResult> Create( PlantSource plantSource)
         {
             plantSource.IsActive=true;
-            plantSource.CreatedDate = DateTime.Now;
+            plantSource.CreatedDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
                 _context.Add(plantSource);
@@ -94,7 +94,9 @@ namespace AsseyLabMgt.Controllers
             {
                 return NotFound();
             }
-            plantSource.UpdatedDate=DateTime.Now;
+            plantSource.UpdatedDate=DateTime.UtcNow;
+            plantSource.CreatedDate=plantSource.CreatedDate.ToUniversalTime();
+            plantSource.IsActive = true;
             if (ModelState.IsValid)
             {
                 try

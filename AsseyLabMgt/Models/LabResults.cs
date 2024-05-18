@@ -24,10 +24,12 @@ public class LabResults
     public decimal Au { get; set; }
     public decimal H2O { get; set; }
     public decimal Mg { get; set; }
+    public decimal P { get; set; }
+    public decimal As { get; set; }
 
 
     //for the record
-    public DateTime CreatedDate { get; set; } = DateTime.Now;
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedDate { get; set; }
     public bool IsActive { get; set; } = false;
 }

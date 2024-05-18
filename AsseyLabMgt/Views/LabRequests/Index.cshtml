@@ -35,9 +35,7 @@
                     <th>
                         @Html.DisplayNameFor(model => model.PlantSource)
                     </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Description)
-                    </th>
+            
                     <th>
                         @Html.DisplayNameFor(model => model.NumberOfSamples)
                     </th>
@@ -74,12 +72,8 @@
                     <th>
                         @Html.DisplayNameFor(model => model.CreatedDate)
                     </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.UpdatedDate)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.IsActive)
-                    </th>
+         
+              
                     <th>Edit</th>
                     <th>View</th>
                     <th>Delete</th>
@@ -105,40 +99,38 @@
                             @Html.DisplayFor(modelItem => item.Department.DeptCode)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.PlantSource.Id)
+                           @Html.DisplayFor(modelItem => item.PlantSource.PlantSourceName)
                         </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Description)
-                        </td>
+    
                         <td>
                             @Html.DisplayFor(modelItem => item.NumberOfSamples)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.DeliveredBy.Id)
+                            @Html.DisplayFor(modelItem => item.DeliveredBy.Fullname)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.ReceivedBy.Id)
+                            @Html.DisplayFor(modelItem => item.ReceivedBy.Fullname)
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.TimeReceived)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.PreparedBy.Id)
+                            @Html.DisplayFor(modelItem => item.PreparedBy.Fullname)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.WeighedBy.Id)
+                            @Html.DisplayFor(modelItem => item.WeighedBy.Fullname)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.DigestedBy.Id)
+                            @Html.DisplayFor(modelItem => item.DigestedBy.Fullname)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.TitratedBy.Id)
+                            @Html.DisplayFor(modelItem => item.TitratedBy.Fullname)
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.DateReported)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.EnteredBy.Id)
+                            @Html.DisplayFor(modelItem => item.EnteredBy.Fullname)
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.TimePreoared)
@@ -146,12 +138,7 @@
                         <td>
                             @Html.DisplayFor(modelItem => item.CreatedDate)
                         </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.UpdatedDate)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.IsActive)
-                        </td>
+          
                         <td>
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary"><i class="fa fa-pen"></i> Edit</a>
                         </td>

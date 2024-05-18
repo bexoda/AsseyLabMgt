@@ -4,9 +4,7 @@
     ViewData["Title"] = "Confirm Lab Request";
 }
 
-<h1>Confirm Lab Request</h1>
-
-<h4>LabRequest Details</h4>
+<h4>Confirm LabRequest Details</h4>
 <hr />
 <div class="row">
     <div class="col-md-8">
@@ -31,36 +29,33 @@
                 <input class="form-control" type="text" value="@Model.LabRequest.Description" readonly />
             </dd>
 
-            <dt class="col-sm-4">Client ID:</dt>
+            <dt class="col-sm-4">Client:</dt>
             <dd class="col-sm-8">
-                <input class="form-control" type="text" value="@Model.LabRequest.ClientId" readonly />
+                <input class="form-control" type="text" value="@Model.LabRequest.Client.ClientCode" readonly />
             </dd>
 
-            <dt class="col-sm-4">Department ID:</dt>
+            <dt class="col-sm-4">Department:</dt>
             <dd class="col-sm-8">
-                <input class="form-control" type="text" value="@Model.LabRequest.DepartmentId" readonly />
+                <input class="form-control" type="text" value="@Model.LabRequest.Department.DeptCode" readonly />
             </dd>
 
-            <dt class="col-sm-4">Plant Source ID:</dt>
+            <dt class="col-sm-4">Plant Source:</dt>
             <dd class="col-sm-8">
-                <input class="form-control" type="text" value="@Model.LabRequest.PlantSourceId" readonly />
+                <input class="form-control" type="text" value="@Model.LabRequest.PlantSource.PlantSourceName" readonly />
             </dd>
 
             <dt class="col-sm-4">Number of Samples:</dt>
             <dd class="col-sm-8">
                 <input class="form-control" type="text" value="@Model.LabRequest.NumberOfSamples" readonly />
             </dd>
-
-
         </dl>
     </div>
 </div>
 
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title">LabRequests List</h3>
+        <h3 class="card-title">LabResults List</h3>
     </div>
-    <!-- /.card-header -->
     <div class="card-body">
         <table id="example1" class="table table-bordered table-striped">
             <thead>
@@ -79,7 +74,6 @@
                     <th>H2O</th>
                     <th>Mg</th>
                     <th>Created Date</th>
-                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -100,11 +94,9 @@
                         <td>@item.H2O</td>
                         <td>@item.Mg</td>
                         <td>@item.CreatedDate.ToString("MM/dd/yyyy")</td>
-                        <td>@(item.IsActive ? "Active" : "Inactive")</td>
                     </tr>
                 }
             </tbody>
-
         </table>
     </div>
 </div>
@@ -114,7 +106,7 @@
 </form>
 
 <div>
-    <a asp-action="Create">Back to Edit</a>
+    <a asp-action="Create" class="btn btn-secondary">Back to Edit</a>
 </div>
 
 @section Scripts {

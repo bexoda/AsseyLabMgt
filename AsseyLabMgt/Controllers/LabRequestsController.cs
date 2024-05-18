@@ -24,7 +24,17 @@ namespace AsseyLabMgt.Controllers
         // GET: LabRequests
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.LabRequests.Include(l => l.Client).Include(l => l.DeliveredBy).Include(l => l.Department).Include(l => l.DigestedBy).Include(l => l.EnteredBy).Include(l => l.PlantSource).Include(l => l.PreparedBy).Include(l => l.ReceivedBy).Include(l => l.TitratedBy).Include(l => l.WeighedBy);
+            var applicationDbContext = _context.LabRequests
+                .Include(l => l.Client)
+                .Include(l => l.DeliveredBy)
+                .Include(l => l.Department)
+                .Include(l => l.DigestedBy)
+                .Include(l => l.EnteredBy)
+                .Include(l => l.PlantSource)
+                .Include(l => l.PreparedBy)
+                .Include(l => l.ReceivedBy)
+                .Include(l => l.TitratedBy)
+                .Include(l => l.WeighedBy);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -57,52 +67,22 @@ namespace AsseyLabMgt.Controllers
         }
 
         // GET: LabRequests/Create
+        [HttpGet]
         public IActionResult Create()
         {
             ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "ClientCode");
-            ViewData["DeliveredById"] = new SelectList(_context.Staff, "Id", "Id");
+            ViewData["DeliveredById"] = new SelectList(_context.Staff, "Id", "Fullname");
             ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode");
-            ViewData["DigestedById"] = new SelectList(_context.Staff, "Id", "Id");
-            ViewData["EnteredById"] = new SelectList(_context.Staff, "Id", "Id");
-            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "Id");
-            ViewData["PreparedById"] = new SelectList(_context.Staff, "Id", "Id");
-            ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Id");
-            ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Id");
-            ViewData["WeighedById"] = new SelectList(_context.Staff, "Id", "Id");
+            ViewData["DigestedById"] = new SelectList(_context.Staff, "Id", "Fullname");
+            ViewData["EnteredById"] = new SelectList(_context.Staff, "Id", "Fullname");
+            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "PlantSourceName");
+            ViewData["PreparedById"] = new SelectList(_context.Staff, "Id", "Fullname");
+            ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Fullname");
+            ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Fullname");
+            ViewData["WeighedById"] = new SelectList(_context.Staff, "Id", "Fullname");
 
-           
             return View();
         }
-
-        /*
-        // POST: LabRequests/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(LabRequest labRequest, IFormFile excelFile)
-        {
-            labRequest.CreatedDate = DateTime.Now;
-            labRequest.IsActive = true;
-            if (ModelState.IsValid)
-            {
-                _context.Add(labRequest);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "ClientCode", labRequest.ClientId);
-            ViewData["DeliveredById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.DeliveredById);
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode", labRequest.DepartmentId);
-            ViewData["DigestedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.DigestedById);
-            ViewData["EnteredById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.EnteredById);
-            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "Id", labRequest.PlantSourceId);
-            ViewData["PreparedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.PreparedById);
-            ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.ReceivedById);
-            ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.TitratedById);
-            ViewData["WeighedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.WeighedById);
-            return View(labRequest);
-        }
-        */
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -137,7 +117,15 @@ namespace AsseyLabMgt.Controllers
         private void PopulateViewData(LabRequest labRequest)
         {
             ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "ClientCode", labRequest.ClientId);
-            // Populate other ViewData similarly
+            ViewData["DeliveredById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.DeliveredById);
+            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode", labRequest.DepartmentId);
+            ViewData["DigestedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.DigestedById);
+            ViewData["EnteredById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.EnteredById);
+            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "PlantName", labRequest.PlantSourceId);
+            ViewData["PreparedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.PreparedById);
+            ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.ReceivedById);
+            ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.TitratedById);
+            ViewData["WeighedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.WeighedById);
         }
 
         private async Task<List<LabResults>> ProcessExcelFileAsync(IFormFile excelFile, LabRequest labRequest)
@@ -172,10 +160,8 @@ namespace AsseyLabMgt.Controllers
                             H2O = worksheet.Row(row).Cell(12).GetValue<decimal>(),
                             Mg = worksheet.Row(row).Cell(13).GetValue<decimal>(),
 
-                            // You may also want to capture and store the creation date here,
-                            // especially if it's not being automatically handled:
                             CreatedDate = DateTime.Now,
-                            IsActive = true // Assuming you want to activate the records immediately
+                            IsActive = true
                         };
 
                         results.Add(labResult);
@@ -186,11 +172,22 @@ namespace AsseyLabMgt.Controllers
             return results;
         }
 
-
         public IActionResult Confirm()
         {
             var labResults = JsonConvert.DeserializeObject<List<LabResults>>(HttpContext.Session.GetString("LabResults"));
             var labRequest = JsonConvert.DeserializeObject<LabRequest>(HttpContext.Session.GetString("LabRequest"));
+
+            // Load related data
+            _context.Entry(labRequest).Reference(l => l.Client).Load();
+            _context.Entry(labRequest).Reference(l => l.Department).Load();
+            _context.Entry(labRequest).Reference(l => l.PlantSource).Load();
+            _context.Entry(labRequest).Reference(l => l.DeliveredBy).Load();
+            _context.Entry(labRequest).Reference(l => l.ReceivedBy).Load();
+            _context.Entry(labRequest).Reference(l => l.DigestedBy).Load();
+            _context.Entry(labRequest).Reference(l => l.EnteredBy).Load();
+            _context.Entry(labRequest).Reference(l => l.PreparedBy).Load();
+            _context.Entry(labRequest).Reference(l => l.TitratedBy).Load();
+            _context.Entry(labRequest).Reference(l => l.WeighedBy).Load();
 
             var viewModel = new ConfirmationViewModel
             {
@@ -198,8 +195,9 @@ namespace AsseyLabMgt.Controllers
                 LabResults = labResults
             };
 
-            return View(viewModel); // Ensure you have a view named Confirm
+            return View(viewModel);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -217,10 +215,10 @@ namespace AsseyLabMgt.Controllers
                 _context.LabResults.Add(result);
             }
             await _context.SaveChangesAsync();
-            HttpContext.Session.Remove("LabResults"); // Clear the session
-            HttpContext.Session.Remove("LabRequest"); // Clear the session
+            HttpContext.Session.Remove("LabResults");
+            HttpContext.Session.Remove("LabRequest");
 
-            return RedirectToAction("Index"); // Redirect to the index or a completion page
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: LabRequests/Edit/5
@@ -236,22 +234,21 @@ namespace AsseyLabMgt.Controllers
             {
                 return NotFound();
             }
+
             ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "ClientCode", labRequest.ClientId);
-            ViewData["DeliveredById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.DeliveredById);
+            ViewData["DeliveredById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.DeliveredById);
             ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode", labRequest.DepartmentId);
-            ViewData["DigestedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.DigestedById);
-            ViewData["EnteredById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.EnteredById);
-            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "Id", labRequest.PlantSourceId);
-            ViewData["PreparedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.PreparedById);
-            ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.ReceivedById);
-            ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.TitratedById);
-            ViewData["WeighedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.WeighedById);
+            ViewData["DigestedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.DigestedById);
+            ViewData["EnteredById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.EnteredById);
+            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "PlantName", labRequest.PlantSourceId);
+            ViewData["PreparedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.PreparedById);
+            ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.ReceivedById);
+            ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.TitratedById);
+            ViewData["WeighedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.WeighedById);
+
             return View(labRequest);
         }
 
-        // POST: LabRequests/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, LabRequest labRequest)
@@ -281,16 +278,7 @@ namespace AsseyLabMgt.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "ClientCode", labRequest.ClientId);
-            ViewData["DeliveredById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.DeliveredById);
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode", labRequest.DepartmentId);
-            ViewData["DigestedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.DigestedById);
-            ViewData["EnteredById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.EnteredById);
-            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "Id", labRequest.PlantSourceId);
-            ViewData["PreparedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.PreparedById);
-            ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.ReceivedById);
-            ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.TitratedById);
-            ViewData["WeighedById"] = new SelectList(_context.Staff, "Id", "Id", labRequest.WeighedById);
+            PopulateViewData(labRequest);
             return View(labRequest);
         }
 

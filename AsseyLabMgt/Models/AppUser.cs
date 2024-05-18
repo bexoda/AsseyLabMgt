@@ -19,8 +19,7 @@ namespace AsseyLabMgt.Models
 
         public DateTime? LoginDate { get; set; }
         public string? ModifiedBy { get; }
-        public string? RoleId { get; set; }
-        public IdentityRole? Role { get; set; }
+
 
     }
 }

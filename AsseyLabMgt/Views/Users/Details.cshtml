@@ -1,0 +1,39 @@
+﻿@model AsseyLabMgt.Models.ViewModels.UsersViewModel
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<h4>User Details</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <dl class="row">
+            <dt class="col-sm-2">First Name</dt>
+            <dd class="col-sm-10">@Model.FirstName</dd>
+
+            <dt class="col-sm-2">Surname</dt>
+            <dd class="col-sm-10">@Model.Surname</dd>
+
+            <dt class="col-sm-2">Other Name</dt>
+            <dd class="col-sm-10">@Model.OtherName</dd>
+
+            <dt class="col-sm-2">User Name</dt>
+            <dd class="col-sm-10">@Model.UserName</dd>
+
+            <dt class="col-sm-2">Email</dt>
+            <dd class="col-sm-10">@Model.Email</dd>
+
+            <dt class="col-sm-2">Phone Number</dt>
+            <dd class="col-sm-10">@Model.PhoneNumber</dd>
+
+            <dt class="col-sm-2">Role</dt>
+            <dd class="col-sm-10">@ViewBag.RoleName</dd>
+        </dl>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>

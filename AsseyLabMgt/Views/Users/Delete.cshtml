@@ -1,0 +1,41 @@
+﻿@model AsseyLabMgt.Models.ViewModels.UsersViewModel
+
+@{
+    ViewData["Title"] = "Delete User";
+}
+
+<h4>Delete User</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <dl class="row">
+            <dt class="col-sm-2">First Name</dt>
+            <dd class="col-sm-10">@Model.FirstName</dd>
+            <dt class="col-sm-2">Surname</dt>
+            <dd class="col-sm-10">@Model.Surname</dd>
+            <dt class="col-sm-2">Other Name</dt>
+            <dd class="col-sm-10">@Model.OtherName</dd>
+            <dt class="col-sm-2">User Name</dt>
+            <dd class="col-sm-10">@Model.UserName</dd>
+            <dt class="col-sm-2">Email</dt>
+            <dd class="col-sm-10">@Model.Email</dd>
+            <dt class="col-sm-2">Phone Number</dt>
+            <dd class="col-sm-10">@Model.PhoneNumber</dd>
+            <dt class="col-sm-2">Role</dt>
+            <dd class="col-sm-10">
+                @{
+                    var role = ViewBag.RoleName as string;
+                    @role
+                }
+            </dd>
+        </dl>
+
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <input type="submit" value="Delete" class="btn btn-danger" />
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

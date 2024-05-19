@@ -33,8 +33,6 @@ builder.Services.AddDefaultIdentity<AppUser>(options =>
 
 builder.Services.AddScoped<ReportGeneratorService>();
 
-
-
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddAuthentication();
@@ -62,7 +60,7 @@ else
     app.UseHsts();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseSession(); // Add this before UseRouting()
 app.UseRouting();

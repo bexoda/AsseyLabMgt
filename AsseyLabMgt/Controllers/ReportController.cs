@@ -15,13 +15,15 @@ namespace AsseyLabMgt.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ReportGeneratorService _reportGeneratorService;
+        private readonly ReportService _reportService;
         private readonly ILogger<ReportController> _logger;
-
-        public ReportController(ApplicationDbContext context, ReportGeneratorService reportGeneratorService, ILogger<ReportController> logger)
+       
+        public ReportController(ApplicationDbContext context, ReportGeneratorService reportGeneratorService, ILogger<ReportController> logger, ReportService reportService)
         {
             _context = context;
             _reportGeneratorService = reportGeneratorService;
             _logger = logger;
+            _reportService = reportService;
         }
 
         // GET: Report
@@ -42,7 +44,8 @@ namespace AsseyLabMgt.Controllers
                 {
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
-                    var reportBytes = await _reportGeneratorService.GenerateGeologyReportAsync(model.StartDate, model.EndDate);
+                    //var reportBytes = await _reportGeneratorService.GenerateGeologyReportAsync(model.StartDate, model.EndDate);
+                    var reportBytes = await _reportService.GenerateGeologyReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"GeologyReport-{DateTime.Now:yyyyMMddHHmmss}.pdf");
 
                 }
@@ -87,7 +90,8 @@ namespace AsseyLabMgt.Controllers
                 {
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
-                    var reportBytes = await _reportGeneratorService.GenerateYearToDateSamplesReceivedReportAsync(model.StartDate, model.EndDate);
+                    //var reportBytes = await _reportGeneratorService.GenerateYearToDateSamplesReceivedReportAsync(model.StartDate, model.EndDate);
+                    var reportBytes = await _reportService.GenerateYearToDateSamplesReceivedReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"YearToDateSamplesReceivedReport-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)
@@ -109,7 +113,8 @@ namespace AsseyLabMgt.Controllers
                 {
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
-                    var reportBytes = await _reportGeneratorService.GenerateYearToDateAnalysisStatisticsReportAsync(model.StartDate, model.EndDate);
+                    //var reportBytes = await _reportGeneratorService.GenerateYearToDateAnalysisStatisticsReportAsync(model.StartDate, model.EndDate);
+                    var reportBytes = await _reportService.GenerateYearToDateAnalysisStatisticsReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"YearToDateAnalysisStatisticsReport-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)
@@ -132,7 +137,8 @@ namespace AsseyLabMgt.Controllers
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
 
-                    var reportBytes = await _reportGeneratorService.GenerateMetReportAsync(model.StartDate, model.EndDate);
+                    //var reportBytes = await _reportGeneratorService.GenerateMetReportAsync(model.StartDate, model.EndDate);
+                    var reportBytes = await _reportService.GenerateMetReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"MetReport-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)

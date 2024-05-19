@@ -4,6 +4,7 @@ using AsseyLabMgt.Utils;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,7 @@ builder.Services.AddDefaultIdentity<AppUser>(options =>
 
 
 builder.Services.AddScoped<ReportGeneratorService>();
+builder.Services.AddScoped<ReportService>();
 
 builder.Services.AddControllersWithViews();
 
@@ -45,6 +47,8 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true; // Make the session cookie essential
 });
+// Set the QuestPDF license type before building the app
+QuestPDF.Settings.License = LicenseType.Community;
 
 var app = builder.Build();
 

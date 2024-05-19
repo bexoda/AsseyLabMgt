@@ -30,8 +30,9 @@ namespace AsseyLabMgt.Controllers
             var labRequestsCount = await _context.LabRequests.CountAsync();
             var labResultsCount = await _context.LabResults.CountAsync();
             var usersCount = await _context.Users.CountAsync();
+      
             // Replace Unique Visitors with a relevant metric if needed
-            var uniqueVisitorsCount = 65;
+            var uniqueVisitorsCount = await _context.Staff.CountAsync();
 
             var model = new DashboardViewModel
             {

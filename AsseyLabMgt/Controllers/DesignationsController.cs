@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AsseyLabMgt.Data;
 using AsseyLabMgt.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AsseyLabMgt.Controllers
 {
+    [Authorize]
     public class DesignationsController : Controller
     {
         private readonly ApplicationDbContext _context;

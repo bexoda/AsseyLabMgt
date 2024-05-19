@@ -9,9 +9,11 @@ using AsseyLabMgt.Data;
 using AsseyLabMgt.Models;
 using ClosedXML.Excel;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AsseyLabMgt.Controllers
 {
+    [Authorize]
     public class LabRequestsController : Controller
     {
         private readonly ApplicationDbContext _context;

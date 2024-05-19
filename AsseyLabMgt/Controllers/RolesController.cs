@@ -1,12 +1,14 @@
 ﻿using AsseyLabMgt.Data;
 using AsseyLabMgt.Models;
 using AsseyLabMgt.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AsseyLabMgt.Controllers
 {
+    [Authorize]
     public class RolesController : Controller
     {
         private readonly UserManager<AppUser> _userManager;

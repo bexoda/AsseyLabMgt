@@ -6,9 +6,11 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using AsseyLabMgt.Utils;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AsseyLabMgt.Controllers
 {
+    [Authorize]
     public class ReportController : Controller
     {
         private readonly ApplicationDbContext _context;

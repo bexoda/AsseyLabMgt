@@ -48,12 +48,16 @@ namespace AsseyLabMgt.Utils
                 var gfx = XGraphics.FromPdfPage(page);
                 var font = new XFont("Times New Roman", 12, XFontStyle.Regular);
 
-                gfx.DrawString("GMC Geology Report - Analysis Statistics", font, XBrushes.Black,
+                var titleFont = new XFont("Times New Roman", 18, XFontStyle.Bold);
+                var subtitleFont = new XFont("Times New Roman", 12, XFontStyle.Italic);
+
+                gfx.DrawString("GMC Geology Report - Analysis Statistics", titleFont, XBrushes.Black,
                     new XRect(0, 0, page.Width, page.Height), XStringFormats.TopCenter);
+                gfx.DrawString($"From {startDate:dd-MMM-yyyy} through {endDate:dd-MMM-yyyy}", subtitleFont, XBrushes.Black,
+                    new XRect(0, 40, page.Width, page.Height), XStringFormats.TopCenter);
                 gfx.DrawString(DateTime.Now.ToString("dd-MMM-yyyy"), font, XBrushes.Black,
                     new XRect(0, 20, page.Width, page.Height), XStringFormats.TopCenter);
-                gfx.DrawString($"From {startDate:dd-MMM-yyyy} through {endDate:dd-MMM-yyyy}", font, XBrushes.Black,
-                    new XRect(0, 40, page.Width, page.Height), XStringFormats.TopCenter);
+
 
                 // Table header
                 gfx.DrawString("Production Date", font, XBrushes.Black, new XRect(40, 60, page.Width, page.Height), XStringFormats.TopLeft);
@@ -118,12 +122,16 @@ namespace AsseyLabMgt.Utils
                 var font = new XFont("Times New Roman", 12, XFontStyle.Regular);
                 var pen = new XPen(XColors.Black, 0.5);
 
-                gfx.DrawString("GMC Daily Report - Samples Received Statistics", font, XBrushes.Black,
+                var titleFont = new XFont("Times New Roman", 18, XFontStyle.Bold);
+                var subtitleFont = new XFont("Times New Roman", 12, XFontStyle.Italic);
+
+                gfx.DrawString("GMC Daily Report - Samples Received Statistics", titleFont, XBrushes.Black,
                     new XRect(0, 0, page.Width, page.Height), XStringFormats.TopCenter);
+                gfx.DrawString($"From {startDate:dd-MMM-yyyy} through {endDate:dd-MMM-yyyy}", subtitleFont, XBrushes.Black,
+                    new XRect(0, 40, page.Width, page.Height), XStringFormats.TopCenter);
                 gfx.DrawString(DateTime.Now.ToString("dd-MMM-yyyy"), font, XBrushes.Black,
                     new XRect(0, 20, page.Width, page.Height), XStringFormats.TopCenter);
-                gfx.DrawString($"From {startDate:dd-MMM-yyyy} through {endDate:dd-MMM-yyyy}", font, XBrushes.Black,
-                    new XRect(0, 40, page.Width, page.Height), XStringFormats.TopCenter);
+
 
                 // Table header
                 gfx.DrawString("Production Date", font, XBrushes.Black, new XRect(40, 60, page.Width, page.Height), XStringFormats.TopLeft);
@@ -213,14 +221,17 @@ namespace AsseyLabMgt.Utils
                 var page = document.AddPage();
                 var gfx = XGraphics.FromPdfPage(page);
                 var font = new XFont("Times New Roman", 12, XFontStyle.Regular);
+                var titleFont = new XFont("Times New Roman", 18, XFontStyle.Bold);
+                var subtitleFont = new XFont("Times New Roman", 12, XFontStyle.Italic);
                 var pen = new XPen(XColors.Black, 0.5);
 
-                gfx.DrawString("GMC Daily Report - Year-To-Date Samples Received Statistics", font, XBrushes.Black,
+                gfx.DrawString("GMC Daily Report - Year-To-Date Samples Received Statistics", titleFont, XBrushes.Black,
                     new XRect(0, 0, page.Width, page.Height), XStringFormats.TopCenter);
-                gfx.DrawString(DateTime.Now.ToString("dd-MMM-yyyy"), font, XBrushes.Black,
-                    new XRect(0, 20, page.Width, page.Height), XStringFormats.TopCenter);
-                gfx.DrawString($"From {startDate:MMM-yyyy} through {endDate:MMM-yyyy}", font, XBrushes.Black,
+                gfx.DrawString($"From {startDate:MMM-yyyy} through {endDate:MMM-yyyy}", subtitleFont, XBrushes.Black,
                     new XRect(0, 40, page.Width, page.Height), XStringFormats.TopCenter);
+                gfx.DrawString(DateTime.Now.ToString("dd-MMM-yyyy"), font, XBrushes.Black,
+                                  new XRect(0, 20, page.Width, page.Height), XStringFormats.TopCenter);
+
 
                 // Table header
                 gfx.DrawString("Month", font, XBrushes.Black, new XRect(40, 60, page.Width, page.Height), XStringFormats.TopLeft);
@@ -312,12 +323,12 @@ namespace AsseyLabMgt.Utils
                 var font = new XFont("Times New Roman", 12, XFontStyle.Regular);
                 var pen = new XPen(XColors.Black, 0.5);
 
-                gfx.DrawString("GMC Year-To-Date Report - Analysis Statistics", font, XBrushes.Black,
-                    new XRect(0, 0, page.Width, page.Height), XStringFormats.TopCenter);
-                gfx.DrawString(DateTime.Now.ToString("dd-MMM-yyyy"), font, XBrushes.Black,
-                    new XRect(0, 20, page.Width, page.Height), XStringFormats.TopCenter);
-                gfx.DrawString($"From {startDate:MMM-yyyy} through {endDate:MMM-yyyy}", font, XBrushes.Black,
-                    new XRect(0, 40, page.Width, page.Height), XStringFormats.TopCenter);
+                var titleFont = new XFont("Times New Roman", 18, XFontStyle.Bold);
+                var subtitleFont = new XFont("Times New Roman", 12, XFontStyle.Italic);
+
+                gfx.DrawString("GMC Year-To-Date Report - Analysis Statistics", titleFont, XBrushes.Black, new XRect(0, 0, page.Width, page.Height), XStringFormats.TopCenter);
+                gfx.DrawString($"From {startDate:MMM-yyyy} through {endDate:MMM-yyyy}", subtitleFont, XBrushes.Black, new XRect(0, 40, page.Width, page.Height), XStringFormats.TopCenter);
+                gfx.DrawString(DateTime.Now.ToString("dd-MMM-yyyy"), font, XBrushes.Black, new XRect(0, 20, page.Width, page.Height), XStringFormats.TopCenter);
 
                 // Table header
                 gfx.DrawString("Month", font, XBrushes.Black, new XRect(40, 60, page.Width, page.Height), XStringFormats.TopLeft);
@@ -392,20 +403,21 @@ namespace AsseyLabMgt.Utils
                     .ToListAsync();
 
                 var groupedResults = labResults.GroupBy(lr => lr.LabRequest.ProductionDate.Date)
-                    .Select(g => new
-                    {
-                        Date = g.Key,
-                        Al2O3 = g.Sum(lr => lr.Al2O3),
-                        CaO = g.Sum(lr => lr.CaO),
-                        Fe = g.Sum(lr => lr.Fe),
-                        H2O = g.Sum(lr => lr.H2O),
-                        Mg = g.Sum(lr => lr.Mg),
-                        MgO = g.Sum(lr => lr.MgO),
-                        Mn = g.Sum(lr => lr.Mn),
-                        P = g.Sum(lr => lr.B), // Assuming B represents P in the data
-                        SiO2 = g.Sum(lr => lr.SiO2),
-                        Total = g.Sum(lr => lr.Al2O3 + lr.CaO + lr.Fe + lr.H2O + lr.Mg + lr.MgO + lr.Mn + lr.B + lr.SiO2)
-                    }).ToList();
+                  .Select(g => new
+                  {
+                      Date = g.Key,
+                      Al2O3 = g.Count(lr => lr.Al2O3 > 0),
+                      CaO = g.Count(lr => lr.CaO > 0),
+                      Fe = g.Count(lr => lr.Fe > 0),
+                      H2O = g.Count(lr => lr.H2O > 0),
+                      Mg = g.Count(lr => lr.Mg > 0),
+                      MgO = g.Count(lr => lr.MgO > 0),
+                      Mn = g.Count(lr => lr.Mn > 0),
+                      P = g.Count(lr => lr.B > 0), // Assuming B represents P in the data
+                      SiO2 = g.Count(lr => lr.SiO2 > 0),
+                      Total = g.Count(lr => lr.Al2O3 > 0) + g.Count(lr => lr.CaO > 0) + g.Count(lr => lr.Fe > 0) + g.Count(lr => lr.H2O > 0) + g.Count(lr => lr.Mg > 0) + g.Count(lr => lr.MgO > 0) + g.Count(lr => lr.Mn > 0) + g.Count(lr => lr.B > 0) + g.Count(lr => lr.SiO2 > 0)
+                  }).ToList();
+
 
                 // Generate PDF
                 using var stream = new MemoryStream();
@@ -416,12 +428,16 @@ namespace AsseyLabMgt.Utils
                 var font = new XFont("Times New Roman", 12, XFontStyle.Regular);
                 var pen = new XPen(XColors.Black, 0.5);
 
-                gfx.DrawString("GMC MET Report - Analysis Statistics", font, XBrushes.Black,
+                var titleFont = new XFont("Times New Roman", 18, XFontStyle.Bold);
+                var subtitleFont = new XFont("Times New Roman", 12, XFontStyle.Italic);
+
+                gfx.DrawString("GMC MET Report - Analysis Statistics", titleFont, XBrushes.Black,
                     new XRect(0, 0, page.Width, page.Height), XStringFormats.TopCenter);
+                gfx.DrawString($"From {startDate:dd-MMM-yyyy} through {endDate:dd-MMM-yyyy}", subtitleFont, XBrushes.Black,
+                    new XRect(0, 40, page.Width, page.Height), XStringFormats.TopCenter);
                 gfx.DrawString(DateTime.Now.ToString("dd-MMM-yyyy"), font, XBrushes.Black,
                     new XRect(0, 20, page.Width, page.Height), XStringFormats.TopCenter);
-                gfx.DrawString($"From {startDate:dd-MMM-yyyy} through {endDate:dd-MMM-yyyy}", font, XBrushes.Black,
-                    new XRect(0, 40, page.Width, page.Height), XStringFormats.TopCenter);
+
 
                 // Table header
                 string[] headers = { "Prod_Date", "Al2O3", "CaO", "Fe", "H2O", "Mg", "MgO", "Mn", "P", "SiO2", "Totals" };

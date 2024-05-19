@@ -108,7 +108,7 @@ namespace AsseyLabMgt.Controllers
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
                     var reportBytes = await _reportGeneratorService.GenerateYearToDateAnalysisStatisticsReportAsync(model.StartDate, model.EndDate);
-                    return File(reportBytes, "application/pdf", "YearToDateAnalysisStatisticsReport.pdf");
+                    return File(reportBytes, "application/pdf", $"YearToDateAnalysisStatisticsReport-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)
                 {

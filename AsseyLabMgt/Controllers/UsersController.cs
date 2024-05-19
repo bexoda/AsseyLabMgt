@@ -107,9 +107,22 @@ namespace AsseyLabMgt.Controllers
                     if (result.Succeeded)
                     {
                         _logger.LogInformation("User {UserName} created successfully.", model.UserName);
-                        await _userManager.AddToRoleAsync(user, model.RoleId);
-                        return RedirectToAction(nameof(Index));
+
+                        // Normalize role ID
+                        var normalizedRoleId = model.RoleId.ToLower(); // Or ToLower(), depending on your convention
+                        var role = await _roleManager.FindByIdAsync(normalizedRoleId);
+                        if (role != null)
+                        {
+                            await _userManager.AddToRoleAsync(user, role.Name);
+                            return RedirectToAction(nameof(Index));
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Role ID {RoleId} does not exist.", normalizedRoleId);
+                            ModelState.AddModelError("", "The specified role does not exist.");
+                        }
                     }
+
 
                     foreach (var error in result.Errors)
                     {

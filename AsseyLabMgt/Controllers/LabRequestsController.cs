@@ -10,6 +10,7 @@ using AsseyLabMgt.Models;
 using ClosedXML.Excel;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authorization;
+using System.Globalization;
 
 namespace AsseyLabMgt.Controllers
 {
@@ -99,7 +100,7 @@ namespace AsseyLabMgt.Controllers
 
             // Generate JobNumber as a long integer from DateTime
             long jobNumber = Convert.ToInt64(DateTime.Now.ToString("yyyyMMddHHmmss"));
-            labRequest.JobNumber = (int)(jobNumber % 1000000000);  // Take last 9 digits to fit in Int32, if necessary
+            labRequest.JobNumber = jobNumber.ToString();  // Take last 9 digits to fit in Int32, if necessary
 
             if (excelFile != null && excelFile.Length > 0)
             {
@@ -152,6 +153,7 @@ namespace AsseyLabMgt.Controllers
                         var labResult = new LabResults
                         {
                             LabRequestId = labRequest.Id, // This will be set after saving LabRequest
+                            // This will be set after saving LabRequest
                             SampleId = worksheet.Row(row).Cell(1).GetValue<string>(),
                             Mn = worksheet.Row(row).Cell(2).GetValue<decimal>(),
                             Sol_Mn = worksheet.Row(row).Cell(3).GetValue<decimal>(),
@@ -167,6 +169,7 @@ namespace AsseyLabMgt.Controllers
                             As = worksheet.Row(row).Cell(13).GetValue<decimal>(),
                             H2O = worksheet.Row(row).Cell(14).GetValue<decimal>(),
                             Mg = worksheet.Row(row).Cell(15).GetValue<decimal>(),
+                            Time = TimeOnly.FromDateTime(worksheet.Row(row).Cell(16).GetValue<DateTime>()),
 
                             CreatedDate = DateTime.UtcNow,
                             IsActive = true

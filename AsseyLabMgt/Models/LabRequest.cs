@@ -14,7 +14,7 @@ public class LabRequest
 
     [DisplayName("Job Number")]
     [Required(ErrorMessage = "Job number is required.")]
-    public int JobNumber { get; set; }
+    public string JobNumber { get; set; }
 
     [DisplayName("Request Date")]
     [DataType(DataType.Date)]
@@ -29,19 +29,19 @@ public class LabRequest
     [DisplayName("Client")]
     [ForeignKey("ClientId")]
     public Client Client { get; set; }
-    [DisplayName("Client ID")]
+    [DisplayName("Client")]
     public int ClientId { get; set; }
 
     [DisplayName("Department")]
     [ForeignKey("DepartmentId")]
     public Department Department { get; set; }
-    [DisplayName("Department ID")]
+    [DisplayName("Department")]
     public int DepartmentId { get; set; }
 
     [DisplayName("Plant Source")]
     [ForeignKey("PlantSourceId")]
     public PlantSource PlantSource { get; set; }
-    [DisplayName("Plant Source ID")]
+    [DisplayName("Plant Source")]
     public int PlantSourceId { get; set; }
 
     [DisplayName("Description")]
@@ -54,13 +54,13 @@ public class LabRequest
     [DisplayName("Delivered By")]
     [ForeignKey("DeliveredById")]
     public Staff DeliveredBy { get; set; }
-    [DisplayName("Delivered By ID")]
+    [DisplayName("Delivered By")]
     public int DeliveredById { get; set; }
 
     [DisplayName("Received By")]
     [ForeignKey("ReceivedById")]
     public Staff ReceivedBy { get; set; }
-    [DisplayName("Received By ID")]
+    [DisplayName("Received By")]
     public int ReceivedById { get; set; }
 
     [DisplayName("Time Received")]
@@ -70,25 +70,25 @@ public class LabRequest
     [DisplayName("Prepared By")]
     [ForeignKey("PreparedById")]
     public Staff PreparedBy { get; set; }
-    [DisplayName("Prepared By ID")]
+    [DisplayName("Prepared By")]
     public int PreparedById { get; set; }
 
     [DisplayName("Weighed By")]
     [ForeignKey("WeighedById")]
     public Staff WeighedBy { get; set; }
-    [DisplayName("Weighed By ID")]
+    [DisplayName("Weighed By")]
     public int WeighedById { get; set; }
 
     [DisplayName("Digested By")]
     [ForeignKey("DigestedById")]
     public Staff DigestedBy { get; set; }
-    [DisplayName("Digested By ID")]
+    [DisplayName("Digested By")]
     public int DigestedById { get; set; }
 
     [DisplayName("Titrated By")]
     [ForeignKey("TitratedById")]
     public Staff TitratedBy { get; set; }
-    [DisplayName("Titrated By ID")]
+    [DisplayName("Titrated By")]
     public int TitratedById { get; set; }
 
     [DisplayName("Date Reported")]
@@ -98,7 +98,7 @@ public class LabRequest
     [DisplayName("Entered By")]
     [ForeignKey("EnteredById")]
     public Staff EnteredBy { get; set; }
-    [DisplayName("Entered By ID")]
+    [DisplayName("Entered By")]
     public int EnteredById { get; set; }
 
     [DisplayName("Time Prepared")]

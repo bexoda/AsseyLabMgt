@@ -1,7 +1,7 @@
 ﻿@model AsseyLabMgt.Models.ReportViewModel
 
 @{
-    ViewData["Title"] = "Geology Report";
+    ViewData["Title"] = "Statistics Reports";
 }
 
 <h1>Statistics</h1>
@@ -10,13 +10,15 @@
     <div class="col-md-6">
         <div class="form-group">
             <label for="startDate">Start Date</label>
-            <input type="date" class="form-control" id="startDate" name="StartDate" asp-for="StartDate" required />
+            
+            <input type="date" class="form-control" id="startDate" name="StartDate" placeholder="dd/mm/yyyy" required />
+          
         </div>
     </div>
     <div class="col-md-6">
         <div class="form-group">
             <label for="endDate">End Date</label>
-            <input type="date" class="form-control" id="endDate" name="EndDate" asp-for="EndDate" required />
+            <input type="date" class="form-control" id="endDate" name="EndDate" placeholder="dd/mm/yyyy" required />
         </div>
     </div>
 </div>
@@ -36,7 +38,7 @@
             <input type="hidden" name="StartDate" id="samplesStartDate" />
             <input type="hidden" name="EndDate" id="samplesEndDate" />
             <button type="submit" class="btn btn-success btn-block">
-                <i class="fas fa-flask"></i> Generate Samples Received Report
+                <i class="fas fa-flask"></i> Generate Daily Samples Report
             </button>
         </form>
     </div>
@@ -71,33 +73,60 @@
             </button>
         </form>
     </div>
+    <div class="col-md-6">
+        <form id="plantReportForm" asp-action="GeneratePlantReport" method="post">
+            <input type="hidden" name="StartDate" id="plantStartDate" />
+            <input type="hidden" name="EndDate" id="plantEndDate" />
+            <input type="hidden" name="SelectedPlantIds" id="selectedPlantIds" />
+            <div class="form-group">
+                <label for="plants">Select Plants</label>
+                <select class="form-control" id="plants" name="SelectedPlantIds" asp-for="SelectedPlantIds" asp-items="Model.Plants" multiple></select>
+            </div>
+            <button type="submit" class="btn btn-dark btn-block">
+                <i class="fas fa-leaf"></i> Generate Plant Daily Report
+            </button>
+        </form>
+    </div>
 </div>
 
 @section Scripts {
     <script>
-        document.getElementById('geologyReportForm').addEventListener('submit', function () {
-            document.getElementById('geoStartDate').value = document.getElementById('startDate').value;
-            document.getElementById('geoEndDate').value = document.getElementById('endDate').value;
-        });
+        (function () {
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    const startDate = document.getElementById('startDate').value;
+                    const endDate = document.getElementById('endDate').value;
 
-        document.getElementById('samplesReceivedReportForm').addEventListener('submit', function () {
-            document.getElementById('samplesStartDate').value = document.getElementById('startDate').value;
-            document.getElementById('samplesEndDate').value = document.getElementById('endDate').value;
-        });
+                    if (!startDate || !endDate) {
+                        event.preventDefault();
+                        alert('Please select both start date and end date.');
+                        return;
+                    }
 
-        document.getElementById('yearToDateSamplesReceivedReportForm').addEventListener('submit', function () {
-            document.getElementById('yearToDateStartDate').value = document.getElementById('startDate').value;
-            document.getElementById('yearToDateEndDate').value = document.getElementById('endDate').value;
-        });
-
-        document.getElementById('yearToDateAnalysisStatisticsReportForm').addEventListener('submit', function () {
-            document.getElementById('yearToDateAnalysisStartDate').value = document.getElementById('startDate').value;
-            document.getElementById('yearToDateAnalysisEndDate').value = document.getElementById('endDate').value;
-        });
-
-        document.getElementById('metReportForm').addEventListener('submit', function () {
-            document.getElementById('metStartDate').value = document.getElementById('startDate').value;
-            document.getElementById('metEndDate').value = document.getElementById('endDate').value;
-        });
+                    if (form.id === 'geologyReportForm') {
+                        document.getElementById('geoStartDate').value = startDate;
+                        document.getElementById('geoEndDate').value = endDate;
+                    } else if (form.id === 'samplesReceivedReportForm') {
+                        document.getElementById('samplesStartDate').value = startDate;
+                        document.getElementById('samplesEndDate').value = endDate;
+                    } else if (form.id === 'yearToDateSamplesReceivedReportForm') {
+                        document.getElementById('yearToDateStartDate').value = startDate;
+                        document.getElementById('yearToDateEndDate').value = endDate;
+                    } else if (form.id === 'yearToDateAnalysisStatisticsReportForm') {
+                        document.getElementById('yearToDateAnalysisStartDate').value = startDate;
+                        document.getElementById('yearToDateAnalysisEndDate').value = endDate;
+                    } else if (form.id === 'metReportForm') {
+                        document.getElementById('metStartDate').value = startDate;
+                        document.getElementById('metEndDate').value = endDate;
+                    } else if (form.id === 'plantReportForm') {
+                        document.getElementById('plantStartDate').value = startDate;
+                        document.getElementById('plantEndDate').value = endDate;
+                        var selectedPlants = Array.from(document.getElementById('plants').selectedOptions).map(option => option.value);
+                        document.getElementById('selectedPlantIds').value = selectedPlants.join(',');
+                    }
+                });
+            });
+        })();
     </script>
 }

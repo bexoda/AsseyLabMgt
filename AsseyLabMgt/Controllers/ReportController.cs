@@ -7,6 +7,7 @@ using System;
 using System.Threading.Tasks;
 using AsseyLabMgt.Utils;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AsseyLabMgt.Controllers
 {
@@ -17,7 +18,7 @@ namespace AsseyLabMgt.Controllers
         private readonly ReportGeneratorService _reportGeneratorService;
         private readonly ReportService _reportService;
         private readonly ILogger<ReportController> _logger;
-       
+
         public ReportController(ApplicationDbContext context, ReportGeneratorService reportGeneratorService, ILogger<ReportController> logger, ReportService reportService)
         {
             _context = context;
@@ -29,8 +30,18 @@ namespace AsseyLabMgt.Controllers
         // GET: Report
         public async Task<IActionResult> Index()
         {
-            // var departments = await _context.Departments.ToListAsync();
-            return View();
+            var plants = await _context.PlantSources.Select(ps => new SelectListItem
+            {
+                Value = ps.Id.ToString(),
+                Text = ps.PlantSourceName
+            }).ToListAsync();
+
+            var model = new ReportViewModel
+            {
+                Plants = plants
+            };
+
+            return View(model);
         }
 
 
@@ -149,6 +160,15 @@ namespace AsseyLabMgt.Controllers
                 }
             }
             return View("Index", model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GeneratePlantReport(ReportViewModel model)
+        {
+
+            var selectedPlantIds = model.SelectedPlantIds ?? new List<int>();
+            var pdfData = await _reportService.GeneratePlantReportAsync(model.StartDate, model.EndDate, selectedPlantIds);
+            return File(pdfData, "application/pdf", $"PlantDailyReport-{DateTime.Now:yyyyMMddHHmmss}.pdf");
         }
     }
 }

@@ -5,6 +5,10 @@
     {
       "library": "intl-tel-input@23.0.1",
       "destination": "wwwroot/lib/intl-tel-input/"
+    },
+    {
+      "library": "select2@4.0.13",
+      "destination": "wwwroot/lib/select2/"
     }
   ]
 }

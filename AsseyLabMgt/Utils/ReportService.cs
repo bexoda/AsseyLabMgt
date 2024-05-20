@@ -91,10 +91,11 @@ namespace AsseyLabMgt.Utils
                                 // Define columns
                                 table.ColumnsDefinition(columns =>
                                 {
-                                    columns.ConstantColumn(120);
-                                    columns.ConstantColumn(120);
-                                    columns.ConstantColumn(120);
-                                    columns.ConstantColumn(120);
+                                    int totalColumns = 4; // Total number of columns
+                                    for (int i = 0; i < totalColumns; i++)
+                                    {
+                                        columns.RelativeColumn(); // Distribute columns evenly
+                                    }
                                 });
 
                                 // Add table headers
@@ -211,12 +212,12 @@ namespace AsseyLabMgt.Utils
                                 // Define columns
                                 table.ColumnsDefinition(columns =>
                                 {
-                                    columns.ConstantColumn(120);
+                                    columns.RelativeColumn(); // First column for Production Date
                                     foreach (var plantSource in plantSources)
                                     {
-                                        columns.ConstantColumn(60);
+                                        columns.RelativeColumn(); // Columns for each Plant Source
                                     }
-                                    columns.ConstantColumn(60);
+                                    columns.RelativeColumn(); // Last column for Totals
                                 });
 
                                 // Add table headers
@@ -332,12 +333,12 @@ namespace AsseyLabMgt.Utils
                                 // Define columns
                                 table.ColumnsDefinition(columns =>
                                 {
-                                    columns.ConstantColumn(120);
+                                    columns.RelativeColumn(); // First column for Production Date
                                     foreach (var plantSource in plantSources)
                                     {
-                                        columns.ConstantColumn(60);
+                                        columns.RelativeColumn(); // Columns for each Plant Source
                                     }
-                                    columns.ConstantColumn(60);
+                                    columns.RelativeColumn(); // Last column for Totals
                                 });
 
                                 // Add table headers
@@ -453,12 +454,12 @@ namespace AsseyLabMgt.Utils
                                 // Define columns
                                 table.ColumnsDefinition(columns =>
                                 {
-                                    columns.ConstantColumn(120);
+                                    columns.RelativeColumn(); // First column for Production Date
                                     foreach (var plantSource in plantSources)
                                     {
-                                        columns.ConstantColumn(60);
+                                        columns.RelativeColumn(); // Columns for each Plant Source
                                     }
-                                    columns.ConstantColumn(60);
+                                    columns.RelativeColumn(); // Last column for Totals
                                 });
 
                                 // Add table headers
@@ -546,10 +547,10 @@ namespace AsseyLabMgt.Utils
                 // Define PDF document
                 var document = Document.Create(container =>
                 {
-                    
+
                     container.Page(page =>
                     {
-                        
+
                         page.Margin(30);
 
                         page.Header().Height(100).Background(Colors.White)
@@ -583,17 +584,17 @@ namespace AsseyLabMgt.Utils
                                 // Define columns
                                 table.ColumnsDefinition(columns =>
                                 {
-                                    columns.ConstantColumn(100);
-                                    columns.ConstantColumn(40);
-                                    columns.ConstantColumn(40);
-                                    columns.ConstantColumn(40);
-                                    columns.ConstantColumn(40);
-                                    columns.ConstantColumn(40);
-                                    columns.ConstantColumn(40);
-                                    columns.ConstantColumn(40);
-                                    columns.ConstantColumn(40);
-                                    columns.ConstantColumn(40);
-                                    columns.ConstantColumn(40);
+                                    columns.RelativeColumn(); // First column for Prod Date
+                                    columns.RelativeColumn(); // Column for Al2O3
+                                    columns.RelativeColumn(); // Column for CaO
+                                    columns.RelativeColumn(); // Column for Fe
+                                    columns.RelativeColumn(); // Column for H2O
+                                    columns.RelativeColumn(); // Column for Mg
+                                    columns.RelativeColumn(); // Column for MgO
+                                    columns.RelativeColumn(); // Column for Mn
+                                    columns.RelativeColumn(); // Column for P
+                                    columns.RelativeColumn(); // Column for SiO2
+                                    columns.RelativeColumn(); // Last column for Totals
                                 });
 
                                 // Add table headers
@@ -666,6 +667,126 @@ namespace AsseyLabMgt.Utils
             }
         }
 
+
+        public async Task<byte[]> GeneratePlantReportAsync(DateTime startDate, DateTime endDate, List<int> selectedPlantIds)
+        {
+            try
+            {
+                // Fetch data from the database based on selected plants
+                var labRequests = await _context.LabRequests
+                    .Where(lr => lr.ProductionDate >= startDate && lr.ProductionDate <= endDate && selectedPlantIds.Contains(lr.PlantSourceId))
+                    .Include(lr => lr.LabResults)
+                    .Include(lr => lr.PlantSource)
+                    .ToListAsync();
+
+                var plantSources = await _context.PlantSources.Where(ps => selectedPlantIds.Contains(ps.Id)).ToListAsync();
+
+                var groupedResults = labRequests.GroupBy(lr => lr.ProductionDate.Date)
+                    .Select(g => new
+                    {
+                        Date = g.Key,
+                        PlantSourceCounts = plantSources.ToDictionary(ps => ps.PlantSourceName, ps => g.Sum(lr => lr.LabResults.Count(res => lr.PlantSourceId == ps.Id)))
+                    }).ToList();
+
+                // Define PDF document
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Margin(50);
+
+                        page.Header().Height(100).Background(Colors.White)
+                            .AlignLeft()
+                            .Row(row =>
+                            {
+                                row.ConstantItem(100).Image(Path.Combine(_env.WebRootPath, "img", "GMC-LOGO-1.png")); // Add logo
+                                row.RelativeItem().Column(column =>
+                                {
+                                    column.Item().Text("GMC Plant Report").FontFamily("Times")
+                                        .FontSize(18)
+                                        .Bold()
+                                        .AlignRight();
+                                    column.Item().Text("Analysis Statistics")
+                                        .FontFamily("Times")
+                                        .FontSize(18)
+                                        .Bold()
+                                        .AlignRight();
+                                    column.Item().Text($"From {startDate:dd-MMM-yyyy} through {endDate:dd-MMM-yyyy}")
+                                        .FontFamily("Times")
+                                        .FontSize(10)
+                                        .AlignRight();
+                                });
+                            });
+
+                        page.Content().Background(Colors.Green.Lighten5)
+                            .PaddingVertical(20)
+                            .Table(table =>
+                            {
+                                // Define columns
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn(); // First column for Production Date
+                                    foreach (var plantSource in plantSources)
+                                    {
+                                        columns.RelativeColumn(); // Columns for each selected Plant Source
+                                    }
+                                    columns.RelativeColumn(); // Last column for Totals
+                                });
+
+                                // Add table headers
+                                table.Header(header =>
+                                {
+                                    header.Cell().Element(CellStyle).Text("Production Date").Italic().Bold();
+                                    foreach (var plantSource in plantSources)
+                                    {
+                                        header.Cell().Element(CellStyle).Text(plantSource.PlantSourceName).Italic().Bold();
+                                    }
+                                    header.Cell().Element(CellStyle).Text("Totals").Italic().Bold();
+                                });
+
+                                // Add table rows
+                                foreach (var result in groupedResults)
+                                {
+                                    table.Cell().Element(CellStyle).Text(result.Date.ToString("dd/MMM/yyyy"));
+                                    foreach (var plantSource in plantSources)
+                                    {
+                                        table.Cell().Element(CellStyle).Text(result.PlantSourceCounts[plantSource.PlantSourceName].ToString());
+                                    }
+                                    table.Cell().Element(CellStyle).Text(result.PlantSourceCounts.Values.Sum().ToString());
+                                }
+
+                                // Add totals row
+                                table.Cell().Element(CellStyle).Text("Totals:");
+                                foreach (var plantSource in plantSources)
+                                {
+                                    table.Cell().Element(CellStyle).Text(groupedResults.Sum(gr => gr.PlantSourceCounts[plantSource.PlantSourceName]).ToString());
+                                }
+                                table.Cell().Element(CellStyle).Text(groupedResults.Sum(gr => gr.PlantSourceCounts.Values.Sum()).ToString());
+                            });
+
+                        page.Footer().Height(50).Background(Colors.White)
+                            .AlignCenter()
+                            .Text($"Report generated on {DateTime.Now:dd-MMM-yyyy}");
+                    });
+                });
+
+                // Generate PDF file
+                byte[] pdfData;
+                using (var stream = new MemoryStream())
+                {
+                    document.GeneratePdf(stream);
+                    pdfData = stream.ToArray();
+                }
+
+                _logger.LogInformation("Plant report generated successfully from {StartDate} to {EndDate}", startDate, endDate);
+                return pdfData;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while generating the plant report.");
+                throw;
+            }
+        }
 
 
     }

@@ -18,10 +18,13 @@ namespace AsseyLabMgt.Controllers
     public class LabRequestsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<LabRequestsController> _logger;
 
-        public LabRequestsController(ApplicationDbContext context)
+
+        public LabRequestsController(ApplicationDbContext context, ILogger<LabRequestsController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: LabRequests
@@ -113,12 +116,96 @@ namespace AsseyLabMgt.Controllers
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(ex, "Error processing file: " + ex.Message);
                     ModelState.AddModelError("", "Error processing file: " + ex.Message);
                 }
             }
 
             PopulateViewData(labRequest);
             return View(labRequest);
+        }
+
+        private async Task<List<LabResults>> ProcessExcelFileAsync(IFormFile excelFile, LabRequest labRequest)
+        {
+            var results = new List<LabResults>();
+            using (var stream = new MemoryStream())
+            {
+                await excelFile.CopyToAsync(stream); // Copy the file to the stream
+                using (var workbook = new XLWorkbook(stream))
+                {
+                    var worksheet = workbook.Worksheets.FirstOrDefault();
+                    if (worksheet == null)
+                    {
+                        _logger.LogError("No worksheet found in the uploaded file.");
+                        throw new InvalidOperationException("No worksheet found");
+                    }
+
+                    // Map column headers to their respective index
+                    var headerMap = new Dictionary<string, int>();
+                    var headerRow = worksheet.Row(1);
+                    for (int col = 1; col <= headerRow.LastCellUsed().Address.ColumnNumber; col++)
+                    {
+                        var header = headerRow.Cell(col).GetValue<string>().Trim();
+                        headerMap[header] = col;
+                    }
+
+                    int row = 2; // Assuming the first row is headers
+                    while (!worksheet.Row(row).Cell(1).IsEmpty())
+                    {
+                        var labResult = new LabResults
+                        {
+                            LabRequestId = labRequest.Id, // This will be set after saving LabRequest
+                            SampleId = GetCellValue<string>(worksheet, row, headerMap, "SampleId"),
+                            Mn = GetCellValue<decimal>(worksheet, row, headerMap, "Mn"),
+                            Sol_Mn = GetCellValue<decimal>(worksheet, row, headerMap, "Sol_Mn"),
+                            Fe = GetCellValue<decimal>(worksheet, row, headerMap, "Fe"),
+                            B = GetCellValue<decimal>(worksheet, row, headerMap, "B"),
+                            MnO2 = GetCellValue<decimal>(worksheet, row, headerMap, "MnO2"),
+                            SiO2 = GetCellValue<decimal>(worksheet, row, headerMap, "SiO2"),
+                            Al2O3 = GetCellValue<decimal>(worksheet, row, headerMap, "Al2O3"),
+                            P = GetCellValue<decimal>(worksheet, row, headerMap, "P"),
+                            MgO = GetCellValue<decimal>(worksheet, row, headerMap, "MgO"),
+                            CaO = GetCellValue<decimal>(worksheet, row, headerMap, "CaO"),
+                            Au = GetCellValue<decimal>(worksheet, row, headerMap, "Au"),
+                            As = GetCellValue<decimal>(worksheet, row, headerMap, "As"),
+                            H2O = GetCellValue<decimal>(worksheet, row, headerMap, "H2O"),
+                            Mg = GetCellValue<decimal>(worksheet, row, headerMap, "Mg"),
+                            Time = GetCellValue<DateTime>(worksheet, row, headerMap, "Time") != DateTime.MinValue
+                                ? (TimeOnly?)TimeOnly.FromDateTime(GetCellValue<DateTime>(worksheet, row, headerMap, "Time"))
+                                : null,
+                            CreatedDate = DateTime.UtcNow,
+                            IsActive = true
+                        };
+
+                        results.Add(labResult);
+                        row++;
+                    }
+                }
+            }
+            _logger.LogInformation("Processed {0} rows from the uploaded file.", results.Count);
+            return results;
+        }
+
+        // Helper method to get cell value and handle missing columns
+        private T GetCellValue<T>(IXLWorksheet worksheet, int row, Dictionary<string, int> headerMap, string columnName)
+        {
+            if (headerMap.ContainsKey(columnName))
+            {
+                try
+                {
+                    return worksheet.Row(row).Cell(headerMap[columnName]).GetValue<T>();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning("Error reading column {0} at row {1}: {2}", columnName, row, ex.Message);
+                    return default(T); // Return default value if there is an error reading the cell
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Column {0} not found in the uploaded file.", columnName);
+                return default(T); // Return default value if the column is not found
+            }
         }
 
         private void PopulateViewData(LabRequest labRequest)
@@ -133,54 +220,6 @@ namespace AsseyLabMgt.Controllers
             ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.ReceivedById);
             ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.TitratedById);
             ViewData["WeighedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.WeighedById);
-        }
-
-        private async Task<List<LabResults>> ProcessExcelFileAsync(IFormFile excelFile, LabRequest labRequest)
-        {
-            var results = new List<LabResults>();
-            using (var stream = new MemoryStream())
-            {
-                await excelFile.CopyToAsync(stream);
-                using (var workbook = new XLWorkbook(stream))
-                {
-                    var worksheet = workbook.Worksheets.FirstOrDefault();
-                    if (worksheet == null)
-                        throw new InvalidOperationException("No worksheet found");
-
-                    int row = 2; // Assuming the first row is headers
-                    while (!worksheet.Row(row).Cell(1).IsEmpty())
-                    {
-                        var labResult = new LabResults
-                        {
-                            LabRequestId = labRequest.Id, // This will be set after saving LabRequest
-                            // This will be set after saving LabRequest
-                            SampleId = worksheet.Row(row).Cell(1).GetValue<string>(),
-                            Mn = worksheet.Row(row).Cell(2).GetValue<decimal>(),
-                            Sol_Mn = worksheet.Row(row).Cell(3).GetValue<decimal>(),
-                            Fe = worksheet.Row(row).Cell(4).GetValue<decimal>(),
-                            B = worksheet.Row(row).Cell(5).GetValue<decimal>(),
-                            MnO2 = worksheet.Row(row).Cell(6).GetValue<decimal>(),
-                            SiO2 = worksheet.Row(row).Cell(7).GetValue<decimal>(),
-                            Al2O3 = worksheet.Row(row).Cell(8).GetValue<decimal>(),
-                            P = worksheet.Row(row).Cell(9).GetValue<decimal>(),
-                            MgO = worksheet.Row(row).Cell(10).GetValue<decimal>(),
-                            CaO = worksheet.Row(row).Cell(11).GetValue<decimal>(),
-                            Au = worksheet.Row(row).Cell(12).GetValue<decimal>(),
-                            As = worksheet.Row(row).Cell(13).GetValue<decimal>(),
-                            H2O = worksheet.Row(row).Cell(14).GetValue<decimal>(),
-                            Mg = worksheet.Row(row).Cell(15).GetValue<decimal>(),
-                            Time = TimeOnly.FromDateTime(worksheet.Row(row).Cell(16).GetValue<DateTime>()),
-
-                            CreatedDate = DateTime.UtcNow,
-                            IsActive = true
-                        };
-
-                        results.Add(labResult);
-                        row++;
-                    }
-                }
-            }
-            return results;
         }
 
         public IActionResult Confirm()

@@ -19,7 +19,7 @@ public class LabResults
 
     [DisplayName("Time")]
     [DataType(DataType.Time)]
-    public TimeOnly Time { get; set; }
+    public TimeOnly? Time { get; set; }
 
     [Required]
     [Display(Name = "Sample ID")]

@@ -155,25 +155,153 @@ namespace AsseyLabMgt.Utils
 
 
         // The following methods should be similarly converted to use QuestPDF
+        /*       public async Task<byte[]> GenerateSamplesReceivedReportAsync(DateTime startDate, DateTime endDate)
+               {
+                   try
+                   {
+                       // Fetch data from the database
+                       // Fetch lab requests within the date range
+                       var labRequests = await _context.LabRequests
+                           .Where(lr => lr.ProductionDate >= startDate && lr.ProductionDate <= endDate)
+                           .Select(lr => new { lr.ProductionDate, lr.NumberOfSamples })
+                           .ToListAsync();
+
+                       // Group by ProductionDate and sum the NumberOfSamples for each date
+                       var groupedResults = labRequests
+                           .GroupBy(lr => lr.ProductionDate.Date)
+                           .Select(g => new
+                           {
+                               Date = g.Key,
+                               TotalSamples = g.Sum(lr => lr.NumberOfSamples)
+                           })
+                           .ToList();
+
+
+                       // Define PDF document
+                       var document = Document.Create(container =>
+                       {
+                           container.Page(page =>
+                           {
+                               page.Margin(50);
+
+                               page.Header().Height(100).Background(Colors.White)
+                                   .AlignLeft()
+                                   .Row(row =>
+                                   {
+                                       row.ConstantItem(100).Image(Path.Combine(_env.WebRootPath, "img", "GMC-LOGO-1.png")); // Add logo
+                                       row.RelativeItem().Column(column =>
+                                       {
+                                           column.Item().Text("GMC Daily Report").FontFamily("Times")
+                                               .FontSize(18)
+                                               .Bold()
+                                               .AlignRight();
+                                           column.Item().Text("Samples Received Statistics")
+                                               .FontFamily("Times")
+                                               .FontSize(18)
+                                               .Bold()
+                                               .AlignRight();
+                                           column.Item().Text($"From {startDate:dd-MMM-yyyy} through {endDate:dd-MMM-yyyy}")
+                                               .FontFamily("Times")
+                                               .FontSize(10)
+                                               .AlignRight();
+                                       });
+                                   });
+
+                               page.Content().Background(Colors.Green.Lighten5)
+                                   .PaddingVertical(20)
+                                   .Table(table =>
+                                   {
+                                       // Define columns
+                                       table.ColumnsDefinition(columns =>
+                                       {
+                                           columns.RelativeColumn(); // First column for Production Date
+                                           foreach (var plantSource in plantSources)
+                                           {
+                                               columns.RelativeColumn(); // Columns for each Plant Source
+                                           }
+                                           columns.RelativeColumn(); // Last column for Totals
+                                       });
+
+                                       // Add table headers
+                                       table.Header(header =>
+                                       {
+                                           header.Cell().Element(CellStyle).Text("Production Date").Italic().Bold();
+                                           foreach (var plantSource in plantSources)
+                                           {
+                                               header.Cell().Element(CellStyle).Text(plantSource.PlantSourceName).Italic().Bold();
+                                           }
+                                           header.Cell().Element(CellStyle).Text("Totals").Italic().Bold();
+                                       });
+
+                                       // Add table rows
+                                       foreach (var result in groupedResults)
+                                       {
+                                           table.Cell().Element(CellStyle).Text(result.Date.ToString("dd/MMM/yyyy"));
+                                           foreach (var plantSource in plantSources)
+                                           {
+                                               table.Cell().Element(CellStyle).Text(result.PlantSourceCounts[plantSource.PlantSourceName].ToString());
+                                           }
+                                           table.Cell().Element(CellStyle).Text(result.PlantSourceCounts.Values.Sum().ToString());
+                                       }
+
+                                       // Add totals row
+                                       table.Cell().Element(CellStyle).Text("Totals:");
+                                       foreach (var plantSource in plantSources)
+                                       {
+                                           table.Cell().Element(CellStyle).Text(groupedResults.Sum(gr => gr.PlantSourceCounts[plantSource.PlantSourceName]).ToString());
+                                       }
+                                       table.Cell().Element(CellStyle).Text(groupedResults.Sum(gr => gr.PlantSourceCounts.Values.Sum()).ToString());
+                                   });
+
+                               page.Footer().Height(50).Background(Colors.White)
+                                   .AlignCenter()
+                                   .Text($"Report generated on {DateTime.Now:dd-MMM-yyyy}");
+                           });
+                       });
+
+                       // Generate PDF file
+                       byte[] pdfData;
+                       using (var stream = new MemoryStream())
+                       {
+                           document.GeneratePdf(stream);
+                           pdfData = stream.ToArray();
+                       }
+
+                       _logger.LogInformation("Report generated successfully from {StartDate} to {EndDate}", startDate, endDate);
+                       return pdfData;
+                   }
+                   catch (Exception ex)
+                   {
+                       _logger.LogError(ex, "An error occurred while generating the report.");
+                       throw;
+                   }
+               }
+       */
         public async Task<byte[]> GenerateSamplesReceivedReportAsync(DateTime startDate, DateTime endDate)
         {
             try
             {
-                // Fetch data from the database
+                // Fetch lab requests within the date range
                 var labRequests = await _context.LabRequests
                     .Where(lr => lr.ProductionDate >= startDate && lr.ProductionDate <= endDate)
-                    .Include(lr => lr.LabResults)
                     .Include(lr => lr.PlantSource)
+                    .Select(lr => new { lr.ProductionDate, lr.NumberOfSamples, lr.PlantSource.PlantSourceName })
                     .ToListAsync();
 
+                // Fetch all plant sources
                 var plantSources = await _context.PlantSources.ToListAsync();
 
-                var groupedResults = labRequests.GroupBy(lr => lr.ProductionDate.Date)
+                // Group by ProductionDate and then by PlantSource, summing NumberOfSamples
+                var groupedResults = labRequests
+                    .GroupBy(lr => lr.ProductionDate.Date)
                     .Select(g => new
                     {
                         Date = g.Key,
-                        PlantSourceCounts = plantSources.ToDictionary(ps => ps.PlantSourceName, ps => g.Sum(lr => lr.LabResults.Count(res => lr.PlantSourceId == ps.Id)))
-                    }).ToList();
+                        PlantSourceCounts = plantSources.ToDictionary(
+                            ps => ps.PlantSourceName,
+                            ps => g.Where(lr => lr.PlantSourceName == ps.PlantSourceName).Sum(lr => lr.NumberOfSamples))
+                    })
+                    .ToList();
 
                 // Define PDF document
                 var document = Document.Create(container =>
@@ -280,21 +408,27 @@ namespace AsseyLabMgt.Utils
         {
             try
             {
-                // Fetch data from the database
+                // Fetch lab requests within the date range
                 var labRequests = await _context.LabRequests
                     .Where(lr => lr.ProductionDate >= startDate && lr.ProductionDate <= endDate)
-                    .Include(lr => lr.LabResults)
                     .Include(lr => lr.PlantSource)
+                    .Select(lr => new { lr.ProductionDate, lr.NumberOfSamples, lr.PlantSource.PlantSourceName })
                     .ToListAsync();
 
+                // Fetch all plant sources
                 var plantSources = await _context.PlantSources.ToListAsync();
 
-                var groupedResults = labRequests.GroupBy(lr => new { lr.ProductionDate.Year, lr.ProductionDate.Month })
+                // Group by Year and Month, then by PlantSource, summing NumberOfSamples
+                var groupedResults = labRequests
+                    .GroupBy(lr => new { lr.ProductionDate.Year, lr.ProductionDate.Month })
                     .Select(g => new
                     {
                         Month = new DateTime(g.Key.Year, g.Key.Month, 1),
-                        PlantSourceCounts = plantSources.ToDictionary(ps => ps.PlantSourceName, ps => g.Sum(lr => lr.LabResults.Count(res => lr.PlantSourceId == ps.Id)))
-                    }).ToList();
+                        PlantSourceCounts = plantSources.ToDictionary(
+                            ps => ps.PlantSourceName,
+                            ps => g.Where(lr => lr.PlantSourceName == ps.PlantSourceName).Sum(lr => lr.NumberOfSamples))
+                    })
+                    .ToList();
 
                 // Define PDF document
                 var document = Document.Create(container =>
@@ -333,7 +467,7 @@ namespace AsseyLabMgt.Utils
                                 // Define columns
                                 table.ColumnsDefinition(columns =>
                                 {
-                                    columns.RelativeColumn(); // First column for Production Date
+                                    columns.RelativeColumn(); // First column for Month
                                     foreach (var plantSource in plantSources)
                                     {
                                         columns.RelativeColumn(); // Columns for each Plant Source
@@ -401,21 +535,28 @@ namespace AsseyLabMgt.Utils
         {
             try
             {
-                // Fetch data from the database
+                // Fetch lab requests within the date range
                 var labRequests = await _context.LabRequests
                     .Where(lr => lr.ProductionDate >= startDate && lr.ProductionDate <= endDate)
                     .Include(lr => lr.LabResults)
                     .Include(lr => lr.PlantSource)
+                    .Select(lr => new { lr.ProductionDate, lr.NumberOfSamples, lr.PlantSource.PlantSourceName })
                     .ToListAsync();
 
+                // Fetch all plant sources
                 var plantSources = await _context.PlantSources.ToListAsync();
 
-                var groupedResults = labRequests.GroupBy(lr => new { lr.ProductionDate.Year, lr.ProductionDate.Month })
+                // Group by Year and Month, then by PlantSource, summing NumberOfSamples
+                var groupedResults = labRequests
+                    .GroupBy(lr => new { lr.ProductionDate.Year, lr.ProductionDate.Month })
                     .Select(g => new
                     {
                         Month = new DateTime(g.Key.Year, g.Key.Month, 1),
-                        PlantSourceCounts = plantSources.ToDictionary(ps => ps.PlantSourceName, ps => g.Sum(lr => lr.LabResults.Count(res => lr.PlantSourceId == ps.Id)))
-                    }).ToList();
+                        PlantSourceCounts = plantSources.ToDictionary(
+                            ps => ps.PlantSourceName,
+                            ps => g.Where(lr => lr.PlantSourceName == ps.PlantSourceName).Sum(lr => lr.NumberOfSamples))
+                    })
+                    .ToList();
 
                 // Define PDF document
                 var document = Document.Create(container =>
@@ -516,6 +657,8 @@ namespace AsseyLabMgt.Utils
                 throw;
             }
         }
+
+
 
 
         public async Task<byte[]> GenerateMetReportAsync(DateTime startDate, DateTime endDate)
@@ -672,21 +815,27 @@ namespace AsseyLabMgt.Utils
         {
             try
             {
-                // Fetch data from the database based on selected plants
+                // Fetch lab requests within the date range and for the selected plants
                 var labRequests = await _context.LabRequests
                     .Where(lr => lr.ProductionDate >= startDate && lr.ProductionDate <= endDate && selectedPlantIds.Contains(lr.PlantSourceId))
                     .Include(lr => lr.LabResults)
                     .Include(lr => lr.PlantSource)
                     .ToListAsync();
 
+                // Fetch the selected plant sources
                 var plantSources = await _context.PlantSources.Where(ps => selectedPlantIds.Contains(ps.Id)).ToListAsync();
 
-                var groupedResults = labRequests.GroupBy(lr => lr.ProductionDate.Date)
+                // Group by ProductionDate and sum the NumberOfSamples for each selected PlantSource
+                var groupedResults = labRequests
+                    .GroupBy(lr => lr.ProductionDate.Date)
                     .Select(g => new
                     {
                         Date = g.Key,
-                        PlantSourceCounts = plantSources.ToDictionary(ps => ps.PlantSourceName, ps => g.Sum(lr => lr.LabResults.Count(res => lr.PlantSourceId == ps.Id)))
-                    }).ToList();
+                        PlantSourceCounts = plantSources.ToDictionary(
+                            ps => ps.PlantSourceName,
+                            ps => g.Where(lr => lr.PlantSourceId == ps.Id).Sum(lr => lr.NumberOfSamples))
+                    })
+                    .ToList();
 
                 // Define PDF document
                 var document = Document.Create(container =>

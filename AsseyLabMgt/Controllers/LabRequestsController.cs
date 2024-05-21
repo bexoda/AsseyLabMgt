@@ -128,7 +128,7 @@ namespace AsseyLabMgt.Controllers
             ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode", labRequest.DepartmentId);
             ViewData["DigestedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.DigestedById);
             ViewData["EnteredById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.EnteredById);
-            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "PlantName", labRequest.PlantSourceId);
+            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "PlantSourceName", labRequest.PlantSourceId);
             ViewData["PreparedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.PreparedById);
             ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.ReceivedById);
             ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.TitratedById);
@@ -251,7 +251,7 @@ namespace AsseyLabMgt.Controllers
             ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode", labRequest.DepartmentId);
             ViewData["DigestedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.DigestedById);
             ViewData["EnteredById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.EnteredById);
-            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "PlantName", labRequest.PlantSourceId);
+            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "PlantSourceName", labRequest.PlantSourceId);
             ViewData["PreparedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.PreparedById);
             ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.ReceivedById);
             ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.TitratedById);
@@ -268,27 +268,27 @@ namespace AsseyLabMgt.Controllers
             {
                 return NotFound();
             }
-
-            if (ModelState.IsValid)
+            labRequest.UpdatedDate = DateTime.UtcNow;
+            //if (ModelState.IsValid)
+            //{
+            try
             {
-                try
-                {
-                    _context.Update(labRequest);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!LabRequestExists(labRequest.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                _context.Update(labRequest);
+                await _context.SaveChangesAsync();
             }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!LabRequestExists(labRequest.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
+            //}
             PopulateViewData(labRequest);
             return View(labRequest);
         }

@@ -69,14 +69,17 @@
                     <div class="form-group">
                         <label asp-for="WeighedById" class="control-label"></label>
                         <select asp-for="WeighedById" class="form-control" asp-items="ViewBag.WeighedById"></select>
+                        @* <select asp-for="WeighedById" class="form-control select2 select2-danger" asp-items="ViewBag.WeighedById"></select> *@
                     </div>
                     <div class="form-group">
                         <label asp-for="DigestedById" class="control-label"></label>
                         <select asp-for="DigestedById" class="form-control" asp-items="ViewBag.DigestedById"></select>
+                        @* <select asp-for="DigestedById" class="form-control select2 select2-danger" asp-items="ViewBag.DigestedById"></select> *@
                     </div>
                     <div class="form-group">
                         <label asp-for="TitratedById" class="control-label"></label>
                         <select asp-for="TitratedById" class="form-control" asp-items="ViewBag.TitratedById"></select>
+                        @* <select asp-for="TitratedById" class="form-control select2 select2-danger" asp-items="ViewBag.TitratedById"></select> *@
                     </div>
                     <div class="form-group">
                         <label asp-for="DateReported" class="control-label"></label>
@@ -119,6 +122,10 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
+        $(function () {
+            //Initialize Select2 Elements
+            $('.select2').select2()
+        });
         document.getElementById('createForm').addEventListener('submit', function (event) {
             document.getElementById('loader').style.display = 'block';
             document.getElementById('submitButton').disabled = true;

@@ -10,9 +10,9 @@
     <div class="col-md-6">
         <div class="form-group">
             <label for="startDate">Start Date</label>
-            
+
             <input type="date" class="form-control" id="startDate" name="StartDate" placeholder="dd/mm/yyyy" required />
-          
+
         </div>
     </div>
     <div class="col-md-6">
@@ -80,7 +80,9 @@
             <input type="hidden" name="SelectedPlantIds" id="selectedPlantIds" />
             <div class="form-group">
                 <label for="plants">Select Plants</label>
-                <select class="form-control" id="plants" name="SelectedPlantIds" asp-for="SelectedPlantIds" asp-items="Model.Plants" multiple></select>
+                @* <select class="form-control" id="plants" name="SelectedPlantIds" asp-for="SelectedPlantIds" asp-items="Model.Plants" multiple></select> *@
+                <select class="select2" multiple="multiple" data-placeholder="Select a Plant source" data-dropdown-css-class="select2-purple" id="plants" name="SelectedPlantIds" asp-for="SelectedPlantIds" asp-items="Model.Plants" style="width: 100%;"></select>
+
             </div>
             <button type="submit" class="btn btn-dark btn-block">
                 <i class="fas fa-leaf"></i> Generate Plant Daily Report
@@ -90,8 +92,12 @@
 </div>
 
 @section Scripts {
+
+
     <script>
         (function () {
+            //Initialize Select2 Elements
+            $('.select2').select2()
             const forms = document.querySelectorAll('form');
             forms.forEach(form => {
                 form.addEventListener('submit', function (event) {

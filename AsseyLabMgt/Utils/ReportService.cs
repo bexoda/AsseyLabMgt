@@ -803,6 +803,7 @@ namespace AsseyLabMgt.Utils
                                 table.Cell().Element(CellStyle).Text(groupedResults.Sum(gr => gr.PlantSourceCounts.Values.Sum()).ToString()).FontSize(8)    ;
                             });
 
+
                         page.Footer().Height(50).Background(Colors.White)
                             .AlignCenter()
                             .Text($"Report generated on {DateTime.Now:dd-MMM-yyyy}");

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace AsseyLabMgt.Controllers
 {
@@ -15,20 +16,31 @@ namespace AsseyLabMgt.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<RolesController> _logger;
 
         public RolesController(UserManager<AppUser> userManager, ApplicationDbContext context,
-            RoleManager<IdentityRole> roleManager, SignInManager<AppUser> signInManager)
+            RoleManager<IdentityRole> roleManager, SignInManager<AppUser> signInManager, ILogger<RolesController> logger)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
         {
-            var roles = await _context.Roles.ToListAsync();
-            return View(roles);
+            try
+            {
+                var roles = await _context.Roles.ToListAsync();
+                return View(roles);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching roles.");
+                TempData["ErrorMessage"] = "An error occurred while fetching roles. Please try again later.";
+                return View(new List<IdentityRole>());
+            }
         }
 
         [HttpGet]
@@ -38,17 +50,37 @@ namespace AsseyLabMgt.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(RolesViewModel role)
         {
-            if (!string.IsNullOrEmpty(role.RoleName))
+            if (ModelState.IsValid)
             {
-                var roleExist = await _roleManager.RoleExistsAsync(role.RoleName);
-                if (!roleExist)
+                if (!string.IsNullOrEmpty(role.RoleName))
                 {
-                    await _roleManager.CreateAsync(new IdentityRole(role.RoleName));
+                    var roleExist = await _roleManager.RoleExistsAsync(role.RoleName);
+                    if (!roleExist)
+                    {
+                        var result = await _roleManager.CreateAsync(new IdentityRole(role.RoleName));
+                        if (result.Succeeded)
+                        {
+                            TempData["SuccessMessage"] = "Role created successfully.";
+                            return RedirectToAction("Index");
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Failed to create role: {RoleName}", role.RoleName);
+                            TempData["ErrorMessage"] = "Failed to create role. Please try again.";
+                            return View(role);
+                        }
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Role name already exists.";
+                        return View(role);
+                    }
                 }
             }
-            return RedirectToAction("Index");
+            return View(role);
         }
 
         [HttpGet]
@@ -65,19 +97,20 @@ namespace AsseyLabMgt.Controllers
                 return NotFound();
             }
 
-            var rolesViewmodel = new RolesViewModel
+            var rolesViewModel = new RolesViewModel
             {
                 RoleId = role.Id,
                 RoleName = role.Name
             };
 
-            return View(rolesViewmodel);
+            return View(rolesViewModel);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(string id, RolesViewModel roleviewmodel)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(string id, RolesViewModel roleViewModel)
         {
-            if (id != roleviewmodel.RoleId)
+            if (id != roleViewModel.RoleId)
             {
                 return BadRequest();
             }
@@ -88,22 +121,25 @@ namespace AsseyLabMgt.Controllers
                 return NotFound();
             }
 
-            if (await _roleManager.RoleExistsAsync(roleviewmodel.RoleName) && role.Name != roleviewmodel.RoleName)
+            if (await _roleManager.RoleExistsAsync(roleViewModel.RoleName) && role.Name != roleViewModel.RoleName)
             {
-                ModelState.AddModelError("", "Role name already exists.");
-                return View(roleviewmodel);
+                TempData["ErrorMessage"] = "Role name already exists.";
+                return View(roleViewModel);
             }
 
-            role.Name = roleviewmodel.RoleName;
+            role.Name = roleViewModel.RoleName;
             var result = await _roleManager.UpdateAsync(role);
-            if (!result.Succeeded)
+            if (result.Succeeded)
             {
-                ModelState.AddModelError("", "Error updating role.");
-                return View(roleviewmodel);
+                TempData["SuccessMessage"] = "Role updated successfully.";
+                return RedirectToAction("Index");
             }
-
-            return RedirectToAction("Index");
+            else
+            {
+                _logger.LogWarning("Failed to update role: {RoleName}", roleViewModel.RoleName);
+                TempData["ErrorMessage"] = "Error updating role. Please try again.";
+                return View(roleViewModel);
+            }
         }
     }
 }
-

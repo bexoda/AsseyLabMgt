@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using AsseyLabMgt.Data;
 using AsseyLabMgt.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 
 namespace AsseyLabMgt.Controllers
 {
@@ -15,10 +16,12 @@ namespace AsseyLabMgt.Controllers
     public class PlantSourcesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<PlantSourcesController> _logger;
 
-        public PlantSourcesController(ApplicationDbContext context)
+        public PlantSourcesController(ApplicationDbContext context, ILogger<PlantSourcesController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: PlantSources
@@ -32,14 +35,16 @@ namespace AsseyLabMgt.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "PlantSource ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var plantSource = await _context.PlantSources
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (plantSource == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "PlantSource not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(plantSource);
@@ -52,19 +57,26 @@ namespace AsseyLabMgt.Controllers
         }
 
         // POST: PlantSources/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create( PlantSource plantSource)
+        public async Task<IActionResult> Create(PlantSource plantSource)
         {
-            plantSource.IsActive=true;
+            plantSource.IsActive = true;
             plantSource.CreatedDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
-                _context.Add(plantSource);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(plantSource);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "PlantSource created successfully.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error creating PlantSource: {ErrorMessage}", ex.Message);
+                    TempData["ErrorMessage"] = "An error occurred while creating the PlantSource.";
+                }
             }
             return View(plantSource);
         }
@@ -74,51 +86,68 @@ namespace AsseyLabMgt.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "PlantSource ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var plantSource = await _context.PlantSources.FindAsync(id);
             if (plantSource == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "PlantSource not found.";
+                return RedirectToAction(nameof(Index));
             }
+
             return View(plantSource);
         }
 
         // POST: PlantSources/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,PlantSource plantSource)
+        public async Task<IActionResult> Edit(int id, PlantSource plantSource)
         {
             if (id != plantSource.Id)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "PlantSource ID mismatch.";
+                return RedirectToAction(nameof(Index));
             }
-            plantSource.UpdatedDate=DateTime.UtcNow;
-            plantSource.CreatedDate=plantSource.CreatedDate.ToUniversalTime();
+            plantSource.UpdatedDate = DateTime.UtcNow;
+            plantSource.CreatedDate = plantSource.CreatedDate.ToUniversalTime();
             plantSource.IsActive = true;
+
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(plantSource);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "PlantSource updated successfully.";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!PlantSourceExists(plantSource.Id))
                     {
-                        return NotFound();
+                        TempData["ErrorMessage"] = "PlantSource not found.";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
+                        _logger.LogError("Concurrency error while updating PlantSource with ID {PlantSourceId}.", plantSource.Id);
+                        TempData["ErrorMessage"] = "An error occurred while updating the PlantSource.";
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating PlantSource with ID {PlantSourceId}: {ErrorMessage}", plantSource.Id, ex.Message);
+                    TempData["ErrorMessage"] = "An error occurred while updating the PlantSource: " + ex.Message;
+                }
             }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid data submitted.";
+            }
+
             return View(plantSource);
         }
 
@@ -127,14 +156,16 @@ namespace AsseyLabMgt.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "PlantSource ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var plantSource = await _context.PlantSources
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (plantSource == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "PlantSource not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(plantSource);
@@ -145,13 +176,26 @@ namespace AsseyLabMgt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var plantSource = await _context.PlantSources.FindAsync(id);
-            if (plantSource != null)
+            try
             {
-                _context.PlantSources.Remove(plantSource);
+                var plantSource = await _context.PlantSources.FindAsync(id);
+                if (plantSource != null)
+                {
+                    _context.PlantSources.Remove(plantSource);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "PlantSource deleted successfully.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "PlantSource not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting PlantSource with ID {PlantSourceId}: {ErrorMessage}", id, ex.Message);
+                TempData["ErrorMessage"] = "An error occurred while deleting the PlantSource: " + ex.Message;
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

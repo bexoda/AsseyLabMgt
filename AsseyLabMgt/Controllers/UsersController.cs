@@ -47,7 +47,8 @@ namespace AsseyLabMgt.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while fetching the list of users.");
-                return StatusCode(500, "Internal server error");
+                TempData["ErrorMessage"] = "An error occurred while fetching the list of users. Please try again later.";
+                return View(new List<AppUser>());
             }
         }
 
@@ -64,7 +65,8 @@ namespace AsseyLabMgt.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while loading the create user form.");
-                return StatusCode(500, "Internal server error");
+                TempData["ErrorMessage"] = "An error occurred while loading the create user form. Please try again later.";
+                return RedirectToAction(nameof(Index));
             }
         }
 
@@ -82,7 +84,7 @@ namespace AsseyLabMgt.Controllers
                     if (existingUser != null)
                     {
                         _logger.LogWarning("Username {UserName} already exists.", model.UserName);
-                        ModelState.AddModelError(string.Empty, "Username already exists.");
+                        TempData["ErrorMessage"] = "Username already exists.";
                         ViewData["RoleId"] = new SelectList(_context.Roles, "Id", "Name");
                         return View(model);
                     }
@@ -93,10 +95,10 @@ namespace AsseyLabMgt.Controllers
                         LastName = model.Surname,
                         OtherName = model.OtherName,
                         CreatedOn = DateTime.UtcNow,
-                        CreatdBy = "Ben",
+                        CreatdBy = "Admin",
                         UserName = model.UserName,
                         Email = model.Email,
-                        PhoneNumber = model.PhoneNumber, // This should now include the international code
+                        PhoneNumber = model.PhoneNumber,
                         NormalizedEmail = model.Email.ToUpper(),
                         NormalizedUserName = model.UserName.ToUpper(),
                         EmailConfirmed = true,
@@ -107,40 +109,36 @@ namespace AsseyLabMgt.Controllers
                     if (result.Succeeded)
                     {
                         _logger.LogInformation("User {UserName} created successfully.", model.UserName);
-
-                        // Normalize role ID
-                        var normalizedRoleId = model.RoleId.ToLower(); // Or ToLower(), depending on your convention
-                        var role = await _roleManager.FindByIdAsync(normalizedRoleId);
+                        var role = await _roleManager.FindByIdAsync(model.RoleId);
                         if (role != null)
                         {
                             await _userManager.AddToRoleAsync(user, role.Name);
+                            TempData["SuccessMessage"] = "User created successfully.";
                             return RedirectToAction(nameof(Index));
                         }
                         else
                         {
-                            _logger.LogWarning("Role ID {RoleId} does not exist.", normalizedRoleId);
-                            ModelState.AddModelError("", "The specified role does not exist.");
+                            _logger.LogWarning("Role ID {RoleId} does not exist.", model.RoleId);
+                            TempData["ErrorMessage"] = "The specified role does not exist.";
                         }
                     }
-
 
                     foreach (var error in result.Errors)
                     {
                         _logger.LogWarning("Error creating user {UserName}: {ErrorDescription}", model.UserName, error.Description);
-                        ModelState.AddModelError(string.Empty, error.Description);
+                        TempData["ErrorMessage"] = error.Description;
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "An error occurred while creating the user {UserName}.", model.UserName);
-                    return StatusCode(500, "Internal server error");
+                    TempData["ErrorMessage"] = "An error occurred while creating the user. Please try again later.";
                 }
             }
 
-            ViewData["RoleId"] = new SelectList(_context.Roles, "Id", "RoleName");
+            ViewData["RoleId"] = new SelectList(_context.Roles, "Id", "Name");
             return View(model);
         }
-
 
         // GET: Users/Edit/5
         [HttpGet]
@@ -148,8 +146,8 @@ namespace AsseyLabMgt.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                _logger.LogWarning("Edit user request with null or empty id.");
-                return BadRequest("User ID cannot be null or empty.");
+                TempData["ErrorMessage"] = "User ID cannot be null or empty.";
+                return RedirectToAction(nameof(Index));
             }
 
             try
@@ -158,8 +156,8 @@ namespace AsseyLabMgt.Controllers
                 var user = await _userManager.FindByIdAsync(id);
                 if (user == null)
                 {
-                    _logger.LogWarning("User with id {UserId} not found.", id);
-                    return NotFound();
+                    TempData["ErrorMessage"] = "User not found.";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 var model = new UsersViewModel
@@ -180,7 +178,8 @@ namespace AsseyLabMgt.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while loading the edit form for user with id {UserId}.", id);
-                return StatusCode(500, "Internal server error");
+                TempData["ErrorMessage"] = "An error occurred while loading the edit form. Please try again later.";
+                return RedirectToAction(nameof(Index));
             }
         }
 
@@ -191,8 +190,8 @@ namespace AsseyLabMgt.Controllers
         {
             if (id != model.Id)
             {
-                _logger.LogWarning("Edit user request with mismatched user ID.");
-                return BadRequest("User ID mismatch.");
+                TempData["ErrorMessage"] = "User ID mismatch.";
+                return RedirectToAction(nameof(Index));
             }
 
             if (ModelState.IsValid)
@@ -203,8 +202,8 @@ namespace AsseyLabMgt.Controllers
                     var user = await _userManager.FindByIdAsync(id);
                     if (user == null)
                     {
-                        _logger.LogWarning("User with id {UserId} not found.", id);
-                        return NotFound();
+                        TempData["ErrorMessage"] = "User not found.";
+                        return RedirectToAction(nameof(Index));
                     }
 
                     user.FirstName = model.FirstName;
@@ -223,42 +222,43 @@ namespace AsseyLabMgt.Controllers
                         var roleResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
                         if (roleResult.Succeeded)
                         {
-                            // Check if the role exists
                             var role = await _roleManager.FindByIdAsync(model.RoleId);
                             if (role != null)
                             {
                                 await _userManager.AddToRoleAsync(user, role.Name);
+                                TempData["SuccessMessage"] = "User updated successfully.";
+                                return RedirectToAction(nameof(Index));
                             }
                             else
                             {
                                 _logger.LogWarning("Role with id {RoleId} does not exist.", model.RoleId);
-                                ModelState.AddModelError(string.Empty, "The selected role does not exist.");
+                                TempData["ErrorMessage"] = "The selected role does not exist.";
                             }
                         }
 
-                        _logger.LogInformation("User with id {UserId} edited successfully.", id);
-                        return RedirectToAction(nameof(Index));
+                        foreach (var error in roleResult.Errors)
+                        {
+                            _logger.LogWarning("Error updating roles for user with id {UserId}: {ErrorDescription}", id, error.Description);
+                            TempData["ErrorMessage"] = error.Description;
+                        }
                     }
 
                     foreach (var error in result.Errors)
                     {
                         _logger.LogWarning("Error editing user with id {UserId}: {ErrorDescription}", id, error.Description);
-                        ModelState.AddModelError(string.Empty, error.Description);
+                        TempData["ErrorMessage"] = error.Description;
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "An error occurred while editing the user with id {UserId}.", id);
-                    return StatusCode(500, "Internal server error");
+                    TempData["ErrorMessage"] = "An error occurred while editing the user. Please try again later.";
                 }
             }
 
-            // Repopulate the role dropdown in case of an error
             ViewData["Roles"] = new SelectList(_context.Roles, "Id", "Name", model.RoleId);
             return View(model);
         }
-
-
 
         // GET: Users/Details/5
         [HttpGet]
@@ -266,8 +266,8 @@ namespace AsseyLabMgt.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                _logger.LogWarning("Details request with null or empty id.");
-                return BadRequest("User ID cannot be null or empty.");
+                TempData["ErrorMessage"] = "User ID cannot be null or empty.";
+                return RedirectToAction(nameof(Index));
             }
 
             try
@@ -276,8 +276,8 @@ namespace AsseyLabMgt.Controllers
                 var user = await _userManager.FindByIdAsync(id);
                 if (user == null)
                 {
-                    _logger.LogWarning("User with id {UserId} not found.", id);
-                    return NotFound();
+                    TempData["ErrorMessage"] = "User not found.";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 var model = new UsersViewModel
@@ -292,18 +292,16 @@ namespace AsseyLabMgt.Controllers
                     RoleId = (await _userManager.GetRolesAsync(user)).FirstOrDefault()
                 };
 
-                
-                ViewBag.RoleName = model.RoleId != null ? model.RoleId : "No Role";
-
+                ViewBag.RoleName = model.RoleId ?? "No Role";
                 return View(model);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while fetching details for user with id {UserId}.", id);
-                return StatusCode(500, "Internal server error");
+                TempData["ErrorMessage"] = "An error occurred while fetching user details. Please try again later.";
+                return RedirectToAction(nameof(Index));
             }
         }
-
 
         // GET: Users/Delete/5
         [HttpGet]
@@ -311,8 +309,8 @@ namespace AsseyLabMgt.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                _logger.LogWarning("Delete request with null or empty id.");
-                return BadRequest("User ID cannot be null or empty.");
+                TempData["ErrorMessage"] = "User ID cannot be null or empty.";
+                return RedirectToAction(nameof(Index));
             }
 
             try
@@ -321,8 +319,8 @@ namespace AsseyLabMgt.Controllers
                 var user = await _userManager.FindByIdAsync(id);
                 if (user == null)
                 {
-                    _logger.LogWarning("User with id {UserId} not found.", id);
-                    return NotFound();
+                    TempData["ErrorMessage"] = "User not found.";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 var model = new UsersViewModel
@@ -337,16 +335,14 @@ namespace AsseyLabMgt.Controllers
                     RoleId = (await _userManager.GetRolesAsync(user)).FirstOrDefault()
                 };
 
-                // Fetching the role name to display
-                var role = await _roleManager.FindByIdAsync(model.RoleId);
-                ViewBag.RoleName = role != null ? role.Name : "No Role";
-
+                ViewBag.RoleName = model.RoleId ?? "No Role";
                 return View(model);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while fetching details for user with id {UserId} to delete.", id);
-                return StatusCode(500, "Internal server error");
+                TempData["ErrorMessage"] = "An error occurred while fetching user details for deletion. Please try again later.";
+                return RedirectToAction(nameof(Index));
             }
         }
 
@@ -357,8 +353,8 @@ namespace AsseyLabMgt.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                _logger.LogWarning("DeleteConfirmed request with null or empty id.");
-                return BadRequest("User ID cannot be null or empty.");
+                TempData["ErrorMessage"] = "User ID cannot be null or empty.";
+                return RedirectToAction(nameof(Index));
             }
 
             try
@@ -367,21 +363,22 @@ namespace AsseyLabMgt.Controllers
                 var user = await _userManager.FindByIdAsync(id);
                 if (user == null)
                 {
-                    _logger.LogWarning("User with id {UserId} not found.", id);
-                    return NotFound();
+                    TempData["ErrorMessage"] = "User not found.";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 var result = await _userManager.DeleteAsync(user);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User with id {UserId} deleted successfully.", id);
+                    TempData["SuccessMessage"] = "User deleted successfully.";
                     return RedirectToAction(nameof(Index));
                 }
 
                 foreach (var error in result.Errors)
                 {
                     _logger.LogWarning("Error deleting user with id {UserId}: {ErrorDescription}", id, error.Description);
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    TempData["ErrorMessage"] = error.Description;
                 }
 
                 // In case of failure, fetch user details again to show the view properly
@@ -397,18 +394,15 @@ namespace AsseyLabMgt.Controllers
                     RoleId = (await _userManager.GetRolesAsync(user)).FirstOrDefault()
                 };
 
-                // Fetching the role name to display
-                var role = await _roleManager.FindByIdAsync(model.RoleId);
-                ViewBag.RoleName = role != null ? role.Name : "No Role";
-
+                ViewBag.RoleName = model.RoleId ?? "No Role";
                 return View("Delete", model);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while deleting user with id {UserId}.", id);
-                return StatusCode(500, "Internal server error");
+                TempData["ErrorMessage"] = "An error occurred while deleting the user. Please try again later.";
+                return RedirectToAction(nameof(Index));
             }
         }
-
     }
 }

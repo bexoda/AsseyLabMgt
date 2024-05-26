@@ -10,7 +10,7 @@ using AsseyLabMgt.Models;
 using ClosedXML.Excel;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authorization;
-using System.Globalization;
+using Microsoft.Extensions.Logging;
 
 namespace AsseyLabMgt.Controllers
 {
@@ -19,7 +19,6 @@ namespace AsseyLabMgt.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<LabRequestsController> _logger;
-
 
         public LabRequestsController(ApplicationDbContext context, ILogger<LabRequestsController> logger)
         {
@@ -45,12 +44,12 @@ namespace AsseyLabMgt.Controllers
         }
 
         // GET: LabRequests/Details/5
-        // GET: LabRequests/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "LabRequest ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var labRequest = await _context.LabRequests
@@ -68,7 +67,8 @@ namespace AsseyLabMgt.Controllers
 
             if (labRequest == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "LabRequest not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             var labResults = await _context.LabResults
@@ -80,22 +80,11 @@ namespace AsseyLabMgt.Controllers
             return View(labRequest);
         }
 
-
         // GET: LabRequests/Create
         [HttpGet]
         public IActionResult Create()
         {
-            ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "ClientCode");
-            ViewData["DeliveredById"] = new SelectList(_context.Staff, "Id", "Fullname");
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode");
-            ViewData["DigestedById"] = new SelectList(_context.Staff, "Id", "Fullname");
-            ViewData["EnteredById"] = new SelectList(_context.Staff, "Id", "Fullname");
-            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "PlantSourceName");
-            ViewData["PreparedById"] = new SelectList(_context.Staff, "Id", "Fullname");
-            ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Fullname");
-            ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Fullname");
-            ViewData["WeighedById"] = new SelectList(_context.Staff, "Id", "Fullname");
-
+            PopulateViewData();
             return View();
         }
 
@@ -112,7 +101,7 @@ namespace AsseyLabMgt.Controllers
 
             // Generate JobNumber as a long integer from DateTime
             long jobNumber = Convert.ToInt64(DateTime.Now.ToString("yyyyMMddHHmmss"));
-            labRequest.JobNumber = jobNumber.ToString();  // Take last 9 digits to fit in Int32, if necessary
+            labRequest.JobNumber = jobNumber.ToString();
 
             if (excelFile != null && excelFile.Length > 0)
             {
@@ -126,8 +115,12 @@ namespace AsseyLabMgt.Controllers
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error processing file: " + ex.Message);
-                    ModelState.AddModelError("", "Error processing file: " + ex.Message);
+                    TempData["ErrorMessage"] = "Error processing file: " + ex.Message;
                 }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Please upload an Excel file.";
             }
 
             PopulateViewData(labRequest);
@@ -139,7 +132,7 @@ namespace AsseyLabMgt.Controllers
             var results = new List<LabResults>();
             using (var stream = new MemoryStream())
             {
-                await excelFile.CopyToAsync(stream); // Copy the file to the stream
+                await excelFile.CopyToAsync(stream);
                 using (var workbook = new XLWorkbook(stream))
                 {
                     var worksheet = workbook.Worksheets.FirstOrDefault();
@@ -163,7 +156,7 @@ namespace AsseyLabMgt.Controllers
                     {
                         var labResult = new LabResults
                         {
-                            LabRequestId = labRequest.Id, // This will be set after saving LabRequest
+                            LabRequestId = labRequest.Id,
                             SampleId = GetCellValue<string>(worksheet, row, headerMap, "SampleId"),
                             Mn = GetCellValue<decimal>(worksheet, row, headerMap, "Mn"),
                             Sol_Mn = GetCellValue<decimal>(worksheet, row, headerMap, "Sol_Mn"),
@@ -195,7 +188,6 @@ namespace AsseyLabMgt.Controllers
             return results;
         }
 
-        // Helper method to get cell value and handle missing columns
         private T GetCellValue<T>(IXLWorksheet worksheet, int row, Dictionary<string, int> headerMap, string columnName)
         {
             if (headerMap.ContainsKey(columnName))
@@ -207,28 +199,28 @@ namespace AsseyLabMgt.Controllers
                 catch (Exception ex)
                 {
                     _logger.LogWarning("Error reading column {0} at row {1}: {2}", columnName, row, ex.Message);
-                    return default(T); // Return default value if there is an error reading the cell
+                    return default(T);
                 }
             }
             else
             {
                 _logger.LogWarning("Column {0} not found in the uploaded file.", columnName);
-                return default(T); // Return default value if the column is not found
+                return default(T);
             }
         }
 
-        private void PopulateViewData(LabRequest labRequest)
+        private void PopulateViewData(LabRequest labRequest = null)
         {
-            ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "ClientCode", labRequest.ClientId);
-            ViewData["DeliveredById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.DeliveredById);
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode", labRequest.DepartmentId);
-            ViewData["DigestedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.DigestedById);
-            ViewData["EnteredById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.EnteredById);
-            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "PlantSourceName", labRequest.PlantSourceId);
-            ViewData["PreparedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.PreparedById);
-            ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.ReceivedById);
-            ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.TitratedById);
-            ViewData["WeighedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.WeighedById);
+            ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "ClientCode", labRequest?.ClientId);
+            ViewData["DeliveredById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest?.DeliveredById);
+            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode", labRequest?.DepartmentId);
+            ViewData["DigestedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest?.DigestedById);
+            ViewData["EnteredById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest?.EnteredById);
+            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "PlantSourceName", labRequest?.PlantSourceId);
+            ViewData["PreparedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest?.PreparedById);
+            ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest?.ReceivedById);
+            ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest?.TitratedById);
+            ViewData["WeighedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest?.WeighedById);
         }
 
         public IActionResult Confirm()
@@ -257,7 +249,6 @@ namespace AsseyLabMgt.Controllers
             return View(viewModel);
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> FinalizeConfirmation()
@@ -277,6 +268,7 @@ namespace AsseyLabMgt.Controllers
             HttpContext.Session.Remove("LabResults");
             HttpContext.Session.Remove("LabRequest");
 
+            TempData["SuccessMessage"] = "Lab request and results saved successfully.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -285,26 +277,18 @@ namespace AsseyLabMgt.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "LabRequest ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var labRequest = await _context.LabRequests.FindAsync(id);
             if (labRequest == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "LabRequest not found.";
+                return RedirectToAction(nameof(Index));
             }
 
-            ViewData["ClientId"] = new SelectList(_context.Clients, "Id", "ClientCode", labRequest.ClientId);
-            ViewData["DeliveredById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.DeliveredById);
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode", labRequest.DepartmentId);
-            ViewData["DigestedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.DigestedById);
-            ViewData["EnteredById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.EnteredById);
-            ViewData["PlantSourceId"] = new SelectList(_context.PlantSources, "Id", "PlantSourceName", labRequest.PlantSourceId);
-            ViewData["PreparedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.PreparedById);
-            ViewData["ReceivedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.ReceivedById);
-            ViewData["TitratedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.TitratedById);
-            ViewData["WeighedById"] = new SelectList(_context.Staff, "Id", "Fullname", labRequest.WeighedById);
-
+            PopulateViewData(labRequest);
             return View(labRequest);
         }
 
@@ -314,29 +298,46 @@ namespace AsseyLabMgt.Controllers
         {
             if (id != labRequest.Id)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "LabRequest ID mismatch.";
+                return RedirectToAction(nameof(Index));
             }
+
             labRequest.UpdatedDate = DateTime.UtcNow;
-            //if (ModelState.IsValid)
-            //{
-            try
+
+            if (ModelState.IsValid)
             {
-                _context.Update(labRequest);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    _context.Update(labRequest);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "LabRequest updated successfully.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!LabRequestExists(labRequest.Id))
+                    {
+                        TempData["ErrorMessage"] = "LabRequest not found.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                    else
+                    {
+                        _logger.LogError("Concurrency error while updating LabRequest with ID {LabRequestId}.", labRequest.Id);
+                        TempData["ErrorMessage"] = "An error occurred while updating the LabRequest.";
+                        throw;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating LabRequest with ID {LabRequestId}: {ErrorMessage}", labRequest.Id, ex.Message);
+                    TempData["ErrorMessage"] = "An error occurred while updating the LabRequest: " + ex.Message;
+                }
             }
-            catch (DbUpdateConcurrencyException)
+            else
             {
-                if (!LabRequestExists(labRequest.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                TempData["ErrorMessage"] = "Invalid data submitted.";
             }
-            return RedirectToAction(nameof(Index));
-            //}
+
             PopulateViewData(labRequest);
             return View(labRequest);
         }
@@ -346,7 +347,8 @@ namespace AsseyLabMgt.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "LabRequest ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var labRequest = await _context.LabRequests
@@ -363,7 +365,8 @@ namespace AsseyLabMgt.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (labRequest == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "LabRequest not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(labRequest);
@@ -374,13 +377,26 @@ namespace AsseyLabMgt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var labRequest = await _context.LabRequests.FindAsync(id);
-            if (labRequest != null)
+            try
             {
-                _context.LabRequests.Remove(labRequest);
+                var labRequest = await _context.LabRequests.FindAsync(id);
+                if (labRequest != null)
+                {
+                    _context.LabRequests.Remove(labRequest);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "LabRequest deleted successfully.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "LabRequest not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting LabRequest with ID {LabRequestId}: {ErrorMessage}", id, ex.Message);
+                TempData["ErrorMessage"] = "An error occurred while deleting the LabRequest: " + ex.Message;
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

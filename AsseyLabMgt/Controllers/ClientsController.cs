@@ -65,6 +65,7 @@ namespace AsseyLabMgt.Controllers
             {
                 _context.Add(client);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Clients created successfully.";
                 return RedirectToAction(nameof(Index));
             }
             return View(client);
@@ -116,6 +117,7 @@ namespace AsseyLabMgt.Controllers
                         throw;
                     }
                 }
+                TempData["SuccessMessage"] = "Updated client successfully.";
                 return RedirectToAction(nameof(Index));
             }
             return View(client);
@@ -151,6 +153,7 @@ namespace AsseyLabMgt.Controllers
             }
 
             await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Deleted client successfully.";
             return RedirectToAction(nameof(Index));
         }
 

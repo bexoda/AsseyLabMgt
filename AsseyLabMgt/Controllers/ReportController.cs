@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AsseyLabMgt.Data;
 using AsseyLabMgt.Models;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
-using AsseyLabMgt.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using AsseyLabMgt.Utils;
 
 namespace AsseyLabMgt.Controllers
 {
@@ -15,14 +17,12 @@ namespace AsseyLabMgt.Controllers
     public class ReportController : Controller
     {
         private readonly ApplicationDbContext _context;
-
         private readonly ReportService _reportService;
         private readonly ILogger<ReportController> _logger;
 
-        public ReportController(ApplicationDbContext context,  ILogger<ReportController> logger, ReportService reportService)
+        public ReportController(ApplicationDbContext context, ILogger<ReportController> logger, ReportService reportService)
         {
             _context = context;
-
             _logger = logger;
             _reportService = reportService;
         }
@@ -44,7 +44,6 @@ namespace AsseyLabMgt.Controllers
             return View(model);
         }
 
-
         // POST: Report/Generate
         [HttpPost]
         public async Task<IActionResult> Generate(ReportViewModel model)
@@ -55,15 +54,13 @@ namespace AsseyLabMgt.Controllers
                 {
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
-                    //var reportBytes = await _reportGeneratorService.GenerateGeologyReportAsync(model.StartDate, model.EndDate);
                     var reportBytes = await _reportService.GenerateGeologyReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"GeoDaily-{DateTime.Now:yyyyMMddHHmmss}.pdf");
-
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "An error occurred while generating the report.");
-                    ModelState.AddModelError("", "An error occurred while generating the report.");
+                    _logger.LogError(ex, "An error occurred while generating the geology report.");
+                    ModelState.AddModelError("", "An error occurred while generating the geology report. Please try again later.");
                 }
             }
             return View(model);
@@ -79,14 +76,13 @@ namespace AsseyLabMgt.Controllers
                 {
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
-                    //var reportBytes = await _reportGeneratorService.GenerateSamplesReceivedReportAsync(model.StartDate, model.EndDate);
                     var reportBytes = await _reportService.GenerateSamplesReceivedReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"DailySamples-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "An error occurred while generating the report.");
-                    ModelState.AddModelError("", "An error occurred while generating the report.");
+                    _logger.LogError(ex, "An error occurred while generating the samples received report.");
+                    ModelState.AddModelError("", "An error occurred while generating the samples received report. Please try again later.");
                 }
             }
             return View(model);
@@ -102,14 +98,13 @@ namespace AsseyLabMgt.Controllers
                 {
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
-                    //var reportBytes = await _reportGeneratorService.GenerateYearToDateSamplesReceivedReportAsync(model.StartDate, model.EndDate);
                     var reportBytes = await _reportService.GenerateYearToDateSamplesReceivedReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"MonthSamples-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "An error occurred while generating the year-to-date report.");
-                    ModelState.AddModelError("", "An error occurred while generating the report.");
+                    _logger.LogError(ex, "An error occurred while generating the year-to-date samples received report.");
+                    ModelState.AddModelError("", "An error occurred while generating the year-to-date samples received report. Please try again later.");
                 }
             }
             return View("Index", model);
@@ -125,14 +120,13 @@ namespace AsseyLabMgt.Controllers
                 {
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
-                    //var reportBytes = await _reportGeneratorService.GenerateYearToDateAnalysisStatisticsReportAsync(model.StartDate, model.EndDate);
                     var reportBytes = await _reportService.GenerateYearToDateAnalysisStatisticsReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"MonthsTotals-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "An error occurred while generating the year-to-date analysis statistics report.");
-                    ModelState.AddModelError("", "An error occurred while generating the report.");
+                    ModelState.AddModelError("", "An error occurred while generating the year-to-date analysis statistics report. Please try again later.");
                 }
             }
             return View("Index", model);
@@ -148,27 +142,39 @@ namespace AsseyLabMgt.Controllers
                 {
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
-
-                    //var reportBytes = await _reportGeneratorService.GenerateMetReportAsync(model.StartDate, model.EndDate);
                     var reportBytes = await _reportService.GenerateMetReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"MetDaily-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "An error occurred while generating the met report.");
-                    ModelState.AddModelError("", "An error occurred while generating the report.");
+                    _logger.LogError(ex, "An error occurred while generating the metallurgy report.");
+                    ModelState.AddModelError("", "An error occurred while generating the metallurgy report. Please try again later.");
                 }
             }
             return View("Index", model);
         }
 
+        // POST: Report/GeneratePlantReport
         [HttpPost]
         public async Task<IActionResult> GeneratePlantReport(ReportViewModel model)
         {
-
-            var selectedPlantIds = model.SelectedPlantIds ?? new List<int>();
-            var pdfData = await _reportService.GeneratePlantReportAsync(model.StartDate, model.EndDate, selectedPlantIds);
-            return File(pdfData, "application/pdf", $"PlantDailyReport-{DateTime.Now:yyyyMMddHHmmss}.pdf");
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    model.StartDate = model.StartDate.ToUniversalTime();
+                    model.EndDate = model.EndDate.ToUniversalTime();
+                    var selectedPlantIds = model.SelectedPlantIds ?? new List<int>();
+                    var pdfData = await _reportService.GeneratePlantReportAsync(model.StartDate, model.EndDate, selectedPlantIds);
+                    return File(pdfData, "application/pdf", $"PlantDailyReport-{DateTime.Now:yyyyMMddHHmmss}.pdf");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred while generating the plant report.");
+                    ModelState.AddModelError("", "An error occurred while generating the plant report. Please try again later.");
+                }
+            }
+            return View("Index", model);
         }
     }
 }

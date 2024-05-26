@@ -6,14 +6,12 @@
     Layout = null;
 }
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AsseyLab Management | Log in </title>
+    <title>AsseyLab Management | Log in</title>
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -29,14 +27,21 @@
         <!-- /.login-logo -->
         <div class="card card-outline card-primary">
             <div class="card-header text-center">
-                <a href="#" class="h1"><b>AsseyLab </b><br/>Management</a>
+                <a href="#" class="h1"><b>AsseyLab </b><br />Management</a>
             </div>
             <div class="card-body">
                 <p class="login-box-msg">Sign in to start your session</p>
 
+                <!-- Error message section -->
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+
                 <form id="account" method="post">
                     <div class="input-group mb-3">
-
                         <input type="email" asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                         <span asp-validation-for="Input.Email" class="text-danger"></span>
                         <div class="input-group-append">
@@ -46,7 +51,6 @@
                         </div>
                     </div>
                     <div class="input-group mb-3">
-
                         <input type="password" asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
                         <span asp-validation-for="Input.Password" class="text-danger"></span>
                         <div class="input-group-append">
@@ -56,26 +60,13 @@
                         </div>
                     </div>
                     <div class="row">
-
                         <!-- /.col -->
                         <div class="col-4">
-
                             <button id="login-submit" type="submit" class="btn btn-primary btn-block">Sign in</button>
                         </div>
                         <!-- /.col -->
                     </div>
                 </form>
-               @*  <p>
-                    <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
-                </p>
-                <p>
-                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
-                </p>
-                <p>
-                    <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
-                </p> *@
-
-
             </div>
             <!-- /.card-body -->
         </div>
@@ -88,7 +79,6 @@
     <script src="~/AdminLTE/dist/js/adminlte.min.js"></script>
 </body>
 </html>
-
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

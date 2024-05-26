@@ -32,14 +32,16 @@ namespace AsseyLabMgt.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Designation ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var designation = await _context.Designation
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (designation == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Designation not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(designation);
@@ -52,8 +54,6 @@ namespace AsseyLabMgt.Controllers
         }
 
         // POST: Designations/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Designation designation)
@@ -62,9 +62,21 @@ namespace AsseyLabMgt.Controllers
             designation.CreatedDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
-                _context.Add(designation);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(designation);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Designation created successfully.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = "An error occurred while creating the designation: " + ex.Message;
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid data submitted.";
             }
             return View(designation);
         }
@@ -74,27 +86,28 @@ namespace AsseyLabMgt.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Designation ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var designation = await _context.Designation.FindAsync(id);
             if (designation == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Designation not found.";
+                return RedirectToAction(nameof(Index));
             }
             return View(designation);
         }
 
         // POST: Designations/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Designation designation)
         {
             if (id != designation.Id)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Designation ID mismatch.";
+                return RedirectToAction(nameof(Index));
             }
 
             designation.UpdatedDate = DateTime.UtcNow;
@@ -105,19 +118,30 @@ namespace AsseyLabMgt.Controllers
                 {
                     _context.Update(designation);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Designation updated successfully.";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!DesignationExists(designation.Id))
                     {
-                        return NotFound();
+                        TempData["ErrorMessage"] = "Designation not found.";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
+                        TempData["ErrorMessage"] = "An error occurred while updating the designation.";
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = "An error occurred while updating the designation: " + ex.Message;
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid data submitted.";
             }
             return View(designation);
         }
@@ -127,14 +151,16 @@ namespace AsseyLabMgt.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Designation ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var designation = await _context.Designation
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (designation == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Designation not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(designation);
@@ -145,13 +171,25 @@ namespace AsseyLabMgt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var designation = await _context.Designation.FindAsync(id);
-            if (designation != null)
+            try
             {
-                _context.Designation.Remove(designation);
+                var designation = await _context.Designation.FindAsync(id);
+                if (designation != null)
+                {
+                    _context.Designation.Remove(designation);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Designation deleted successfully.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Designation not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while deleting the designation: " + ex.Message;
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

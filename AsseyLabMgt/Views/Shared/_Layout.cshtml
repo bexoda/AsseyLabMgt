@@ -218,6 +218,9 @@
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
 
+            <!-- Display error messages from TempData -->
+            @await Html.PartialAsync("_Messages")
+
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">

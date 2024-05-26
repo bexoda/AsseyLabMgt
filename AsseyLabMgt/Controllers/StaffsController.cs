@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using AsseyLabMgt.Data;
 using AsseyLabMgt.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 
 namespace AsseyLabMgt.Controllers
 {
@@ -15,10 +16,12 @@ namespace AsseyLabMgt.Controllers
     public class StaffsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<StaffsController> _logger;
 
-        public StaffsController(ApplicationDbContext context)
+        public StaffsController(ApplicationDbContext context, ILogger<StaffsController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: Staffs
@@ -33,7 +36,8 @@ namespace AsseyLabMgt.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Staff ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var staff = await _context.Staff
@@ -42,7 +46,8 @@ namespace AsseyLabMgt.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (staff == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Staff not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(staff);
@@ -57,65 +62,76 @@ namespace AsseyLabMgt.Controllers
         }
 
         // POST: Staffs/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create( Staff staff)
+        public async Task<IActionResult> Create(Staff staff)
         {
-            // Assuming you have FirstName and LastName, and you want to compute FullName
             if (!string.IsNullOrEmpty(staff.Firstname) && !string.IsNullOrEmpty(staff.Surname))
             {
                 staff.Fullname = $"{staff.Firstname} {staff.Surname}";
             }
 
-            // Optionally, you can manually add model errors based on custom logic
             if (string.IsNullOrEmpty(staff.Fullname))
             {
                 ModelState.AddModelError("FullName", "Full name cannot be empty.");
             }
+
             staff.CreatedDate = DateTime.UtcNow;
 
-            //if (ModelState.IsValid)
-            //{
-                _context.Add(staff);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            //}
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Add(staff);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Staff created successfully.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error creating staff: {ErrorMessage}", ex.Message);
+                    TempData["ErrorMessage"] = "An error occurred while creating the staff. Please try again.";
+                }
+            }
 
+            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode", staff.DepartmentId);
+            ViewData["DesignationId"] = new SelectList(_context.Designation, "Id", "DesignationName", staff.DesignationId);
             return View(staff);
         }
-
 
         // GET: Staffs/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Staff ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var staff = await _context.Staff.FindAsync(id);
             if (staff == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Staff not found.";
+                return RedirectToAction(nameof(Index));
             }
+
             ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode", staff.DepartmentId);
-            ViewData["DesignationId"] = new SelectList(_context.Designation, "Id", "Id", staff.DesignationId);
+            ViewData["DesignationId"] = new SelectList(_context.Designation, "Id", "DesignationName", staff.DesignationId);
             return View(staff);
         }
 
         // POST: Staffs/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,StaffNumber,Surname,Firstname,Othername,Email,Fullname,Phone,DepartmentId,DesignationId,CreatedDate,UpdatedDate,IsActive")] Staff staff)
+        public async Task<IActionResult> Edit(int id, Staff staff)
         {
             if (id != staff.Id)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Staff ID mismatch.";
+                return RedirectToAction(nameof(Index));
             }
+
+            staff.UpdatedDate = DateTime.UtcNow;
 
             if (ModelState.IsValid)
             {
@@ -123,22 +139,32 @@ namespace AsseyLabMgt.Controllers
                 {
                     _context.Update(staff);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Staff updated successfully.";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!StaffExists(staff.Id))
                     {
-                        return NotFound();
+                        TempData["ErrorMessage"] = "Staff not found.";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
+                        _logger.LogError("Concurrency error while updating staff with ID {StaffId}.", staff.Id);
+                        TempData["ErrorMessage"] = "An error occurred while updating the staff.";
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating staff with ID {StaffId}: {ErrorMessage}", staff.Id, ex.Message);
+                    TempData["ErrorMessage"] = "An error occurred while updating the staff. Please try again.";
+                }
             }
+
             ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "DeptCode", staff.DepartmentId);
-            ViewData["DesignationId"] = new SelectList(_context.Designation, "Id", "Id", staff.DesignationId);
+            ViewData["DesignationId"] = new SelectList(_context.Designation, "Id", "DesignationName", staff.DesignationId);
             return View(staff);
         }
 
@@ -147,7 +173,8 @@ namespace AsseyLabMgt.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Staff ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var staff = await _context.Staff
@@ -156,7 +183,8 @@ namespace AsseyLabMgt.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (staff == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Staff not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(staff);
@@ -167,13 +195,26 @@ namespace AsseyLabMgt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var staff = await _context.Staff.FindAsync(id);
-            if (staff != null)
+            try
             {
-                _context.Staff.Remove(staff);
+                var staff = await _context.Staff.FindAsync(id);
+                if (staff != null)
+                {
+                    _context.Staff.Remove(staff);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Staff deleted successfully.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Staff not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting staff with ID {StaffId}: {ErrorMessage}", id, ex.Message);
+                TempData["ErrorMessage"] = "An error occurred while deleting the staff. Please try again.";
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

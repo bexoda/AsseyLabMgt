@@ -32,14 +32,16 @@ namespace AsseyLabMgt.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Department ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var department = await _context.Departments
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (department == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Department not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(department);
@@ -52,8 +54,6 @@ namespace AsseyLabMgt.Controllers
         }
 
         // POST: Departments/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Department department)
@@ -62,9 +62,21 @@ namespace AsseyLabMgt.Controllers
             department.CreatedDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
-                _context.Add(department);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(department);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Department created successfully.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = "An error occurred while creating the department: " + ex.Message;
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid data submitted.";
             }
             return View(department);
         }
@@ -74,48 +86,61 @@ namespace AsseyLabMgt.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Department ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var department = await _context.Departments.FindAsync(id);
             if (department == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Department not found.";
+                return RedirectToAction(nameof(Index));
             }
             return View(department);
         }
 
         // POST: Departments/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,Department department)
+        public async Task<IActionResult> Edit(int id, Department department)
         {
             if (id != department.Id)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Department ID mismatch.";
+                return RedirectToAction(nameof(Index));
             }
-            department.UpdatedDate= DateTime.UtcNow;
+
+            department.UpdatedDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(department);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Department updated successfully.";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!DepartmentExists(department.Id))
                     {
-                        return NotFound();
+                        TempData["ErrorMessage"] = "Department not found.";
+                        return RedirectToAction(nameof(Index));
                     }
                     else
                     {
+                        TempData["ErrorMessage"] = "An error occurred while updating the department.";
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = "An error occurred while updating the department: " + ex.Message;
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid data submitted.";
             }
             return View(department);
         }
@@ -125,14 +150,16 @@ namespace AsseyLabMgt.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Department ID is required.";
+                return RedirectToAction(nameof(Index));
             }
 
             var department = await _context.Departments
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (department == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Department not found.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(department);
@@ -143,13 +170,25 @@ namespace AsseyLabMgt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var department = await _context.Departments.FindAsync(id);
-            if (department != null)
+            try
             {
-                _context.Departments.Remove(department);
+                var department = await _context.Departments.FindAsync(id);
+                if (department != null)
+                {
+                    _context.Departments.Remove(department);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Department deleted successfully.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Department not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while deleting the department: " + ex.Message;
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

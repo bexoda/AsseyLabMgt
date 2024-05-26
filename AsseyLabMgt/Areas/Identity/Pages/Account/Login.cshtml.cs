@@ -99,7 +99,8 @@ namespace AsseyLabMgt.Areas.Identity.Pages.Account
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    _logger.LogWarning("Invalid login attempt.");
+                    TempData["ErrorMessage"] = "Invalid login attempt.";
                     return Page();
                 }
             }

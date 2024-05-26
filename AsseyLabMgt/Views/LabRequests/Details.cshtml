@@ -4,141 +4,143 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<div class="card">
+    <div class="card-header">
+        <h4>LabRequest Details</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.JobNumber)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.JobNumber)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Date)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.Date)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.ProductionDate)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.ProductionDate)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Client)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.Client.ClientCode)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Department)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.Department.DeptCode)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.PlantSource)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.PlantSource.PlantSourceName)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Description)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.Description)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.NumberOfSamples)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.NumberOfSamples)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.DeliveredBy)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.DeliveredBy.Fullname)</dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="row">
+
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.ReceivedBy)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.ReceivedBy.Fullname)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.TimeReceived)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.TimeReceived)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.PreparedBy)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.PreparedBy.Fullname)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.WeighedBy)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.WeighedBy.Fullname)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.DigestedBy)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.DigestedBy.Fullname)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.TitratedBy)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.TitratedBy.Fullname)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.DateReported)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.DateReported)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.EnteredBy)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.EnteredBy.Fullname)</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.TimePreoared)</dt>
+                    <dd class="col-sm-8">@Html.DisplayFor(model => model.TimePreoared)</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h5>Lab Results</h5>
+    </div>
+    <div class="card-body">
+        @if (ViewBag.LabResults != null && ViewBag.LabResults.Count > 0)
+        {
+            <div class="card-body">
+                <table id="example1" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Sample ID</th>
+                            <th>Mn</th>
+                            <th>Sol_Mn</th>
+                            <th>Fe</th>
+                            <th>B</th>
+                            <th>MnO2</th>
+                            <th>SiO2</th>
+                            <th>Al2O3</th>
+                            <th>MgO</th>
+                            <th>CaO</th>
+                            <th>Au</th>
+                            <th>H2O</th>
+                            <th>Mg</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in ViewBag.LabResults as List<AsseyLabMgt.Models.LabResults>)
+                        {
+                            <tr>
+                                <td>@item.SampleId</td>
+                                <td>@item.Mn</td>
+                                <td>@item.Sol_Mn</td>
+                                <td>@item.Fe</td>
+                                <td>@item.B</td>
+                                <td>@item.MnO2</td>
+                                <td>@item.SiO2</td>
+                                <td>@item.Al2O3</td>
+                                <td>@item.MgO</td>
+                                <td>@item.CaO</td>
+                                <td>@item.Au</td>
+                                <td>@item.H2O</td>
+                                <td>@item.Mg</td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p>No lab results available.</p>
+        }
+    </div>
+</div>
 
 <div>
-    <h4>LabRequest</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.JobNumber)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.JobNumber)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Date)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Date)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductionDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProductionDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Client)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Client.ClientCode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Department)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Department.DeptCode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PlantSource)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PlantSource.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NumberOfSamples)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NumberOfSamples)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DeliveredBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DeliveredBy.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ReceivedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ReceivedBy.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TimeReceived)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TimeReceived)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PreparedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PreparedBy.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.WeighedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.WeighedBy.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DigestedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DigestedBy.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TitratedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TitratedBy.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateReported)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateReported)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EnteredBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EnteredBy.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TimePreoared)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TimePreoared)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsActive)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsActive)
-        </dd>
-    </dl>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

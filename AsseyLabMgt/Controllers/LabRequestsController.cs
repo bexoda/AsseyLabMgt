@@ -45,6 +45,7 @@ namespace AsseyLabMgt.Controllers
         }
 
         // GET: LabRequests/Details/5
+        // GET: LabRequests/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -64,13 +65,21 @@ namespace AsseyLabMgt.Controllers
                 .Include(l => l.TitratedBy)
                 .Include(l => l.WeighedBy)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (labRequest == null)
             {
                 return NotFound();
             }
 
+            var labResults = await _context.LabResults
+                .Where(lr => lr.LabRequestId == id)
+                .ToListAsync();
+
+            ViewBag.LabResults = labResults;
+
             return View(labRequest);
         }
+
 
         // GET: LabRequests/Create
         [HttpGet]

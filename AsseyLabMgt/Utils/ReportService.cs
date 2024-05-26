@@ -42,18 +42,29 @@ namespace AsseyLabMgt.Utils
         {
             try
             {
+                var geologyDepartmentId = await _context.Departments
+                              .Where(d => d.DeptName.Contains("Geology"))
+                              .Select(d => d.Id)
+                              .FirstOrDefaultAsync();
+
+                if (geologyDepartmentId == 0)
+                {
+                    throw new InvalidOperationException("Geology department not found.");
+                }
+
+
                 // Fetch data from the database
                 var labResults = await _context.LabResults
-               .Where(lr => lr.CreatedDate >= startDate && lr.CreatedDate <= endDate)
-               .ToListAsync();
+                    .Where(lr => lr.CreatedDate >= startDate && lr.CreatedDate <= endDate && lr.LabRequest.DepartmentId == geologyDepartmentId)
+                    .ToListAsync();
 
                 var groupedResults = labResults.GroupBy(lr => lr.CreatedDate.Date)
-                 .Select(g => new
-                 {
-                     Date = g.Key,
-                     FeCount = g.Count(lr => lr.Fe > 0),
-                     MnCount = g.Count(lr => lr.Mn > 0)
-                 }).ToList();
+                    .Select(g => new
+                    {
+                        Date = g.Key,
+                        FeCount = g.Count(lr => lr.Fe > 0),
+                        MnCount = g.Count(lr => lr.Mn > 0)
+                    }).ToList();
 
                 // Define PDF document
                 var document = Document.Create(container =>
@@ -156,17 +167,25 @@ namespace AsseyLabMgt.Utils
         {
             try
             {
-                _logger.LogInformation("Generating MET report from {StartDate} to {EndDate}", startDate, endDate);
+                // Define the ID or name of the Metallurgy department
+                int metallurgyDepartmentId = await _context.Departments
+                    .Where(d => d.DeptName.Contains("metallurgy"))
+                    .Select(d => d.Id)
+                    .FirstOrDefaultAsync();
+
+                // Check if metallurgy department ID is found
+                if (metallurgyDepartmentId == 0)
+                {
+                    throw new Exception("Metallurgy department not found.");
+                }
 
                 // Fetch data from the database
                 var labResults = await _context.LabResults
-                    .Where(lr => lr.CreatedDate >= startDate && lr.CreatedDate <= endDate)
-                    .Include(lr => lr.LabRequest) // Ensure LabRequest is included to access ProductionDate
+                    .Where(lr => lr.CreatedDate >= startDate && lr.CreatedDate <= endDate && lr.LabRequest.DepartmentId == metallurgyDepartmentId)
+                    .Include(lr => lr.LabRequest)
                     .ToListAsync();
 
-                _logger.LogInformation("Fetched {Count} lab results between {StartDate} and {EndDate}", labResults.Count, startDate, endDate);
-
-                var groupedResults = labResults.GroupBy(lr => lr.LabRequest.ProductionDate.Date)
+                var groupedResults = labResults.GroupBy(lr => lr.LabRequest.CreatedDate)
                     .Select(g => new
                     {
                         Date = g.Key,
@@ -181,8 +200,6 @@ namespace AsseyLabMgt.Utils
                         SiO2 = g.Count(lr => lr.SiO2 > 0),
                         Total = g.Count(lr => lr.Al2O3 > 0) + g.Count(lr => lr.CaO > 0) + g.Count(lr => lr.Fe > 0) + g.Count(lr => lr.H2O > 0) + g.Count(lr => lr.Mg > 0) + g.Count(lr => lr.MgO > 0) + g.Count(lr => lr.Mn > 0) + g.Count(lr => lr.B > 0) + g.Count(lr => lr.SiO2 > 0)
                     }).ToList();
-
-                _logger.LogInformation("Grouped results: {GroupedResults}", JsonConvert.SerializeObject(groupedResults));
 
                 // Define PDF document
                 var document = Document.Create(container =>
@@ -800,7 +817,7 @@ namespace AsseyLabMgt.Utils
                                 {
                                     table.Cell().Element(CellStyle).Text(groupedResults.Sum(gr => gr.PlantSourceCounts[plantSource.PlantSourceName]).ToString()).FontSize(8);
                                 }
-                                table.Cell().Element(CellStyle).Text(groupedResults.Sum(gr => gr.PlantSourceCounts.Values.Sum()).ToString()).FontSize(8)    ;
+                                table.Cell().Element(CellStyle).Text(groupedResults.Sum(gr => gr.PlantSourceCounts.Values.Sum()).ToString()).FontSize(8);
                             });
 
 
@@ -828,7 +845,7 @@ namespace AsseyLabMgt.Utils
             }
         }
 
-      
+
 
     }
 

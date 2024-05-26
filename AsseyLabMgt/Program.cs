@@ -31,8 +31,6 @@ builder.Services.AddDefaultIdentity<AppUser>(options =>
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-
-builder.Services.AddScoped<ReportGeneratorService>();
 builder.Services.AddScoped<ReportService>();
 
 builder.Services.AddControllersWithViews();

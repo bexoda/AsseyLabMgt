@@ -23,10 +23,10 @@ namespace AsseyLabMgt.Utils
     public class ReportService
     {
         private readonly IWebHostEnvironment _env;
-        private readonly ILogger<ReportGeneratorService> _logger;
+        private readonly ILogger<ReportService> _logger;
         private readonly ApplicationDbContext _context;
 
-        public ReportService(IWebHostEnvironment env, ILogger<ReportGeneratorService> logger, ApplicationDbContext context)
+        public ReportService(IWebHostEnvironment env, ILogger<ReportService> logger, ApplicationDbContext context)
         {
             _env = env;
             _logger = logger;

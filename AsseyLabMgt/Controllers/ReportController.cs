@@ -15,14 +15,14 @@ namespace AsseyLabMgt.Controllers
     public class ReportController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly ReportGeneratorService _reportGeneratorService;
+
         private readonly ReportService _reportService;
         private readonly ILogger<ReportController> _logger;
 
-        public ReportController(ApplicationDbContext context, ReportGeneratorService reportGeneratorService, ILogger<ReportController> logger, ReportService reportService)
+        public ReportController(ApplicationDbContext context,  ILogger<ReportController> logger, ReportService reportService)
         {
             _context = context;
-            _reportGeneratorService = reportGeneratorService;
+
             _logger = logger;
             _reportService = reportService;
         }

@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AsseyLabMgt.Data;
+using AsseyLabMgt.Models;
+using ClosedXML.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using AsseyLabMgt.Data;
-using AsseyLabMgt.Models;
-using ClosedXML.Excel;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Logging;
 
 namespace AsseyLabMgt.Controllers
 {

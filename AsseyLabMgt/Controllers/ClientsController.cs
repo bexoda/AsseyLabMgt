@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using AsseyLabMgt.Data;
+﻿using AsseyLabMgt.Data;
 using AsseyLabMgt.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AsseyLabMgt.Controllers
 {
@@ -92,13 +87,13 @@ namespace AsseyLabMgt.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,Client client)
+        public async Task<IActionResult> Edit(int id, Client client)
         {
             if (id != client.Id)
             {
                 return NotFound();
             }
-            client.UpdatedDate= DateTime.UtcNow;
+            client.UpdatedDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
                 try

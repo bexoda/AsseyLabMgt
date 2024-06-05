@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity;
-using System;
 using System.ComponentModel;  // Needed for the DisplayName attribute
 
 namespace AsseyLabMgt.Models

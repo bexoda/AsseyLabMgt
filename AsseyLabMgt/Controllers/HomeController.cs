@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace AsseyLabMgt.Controllers
 {
@@ -30,7 +29,7 @@ namespace AsseyLabMgt.Controllers
             var labRequestsCount = await _context.LabRequests.CountAsync();
             var labResultsCount = await _context.LabResults.CountAsync();
             var usersCount = await _context.Users.CountAsync();
-      
+
             // Replace Unique Visitors with a relevant metric if needed
             var uniqueVisitorsCount = await _context.Staff.CountAsync();
 

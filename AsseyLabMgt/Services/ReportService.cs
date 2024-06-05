@@ -1,0 +1,248 @@
+﻿using AsseyLabMgt.Data;
+using AsseyLabMgt.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+
+namespace AsseyLabMgt.Services
+{
+    public class ReportService
+    {
+        private readonly IWebHostEnvironment _env;
+        private readonly ILogger<ReportService> _logger;
+        private readonly ApplicationDbContext _context;
+
+        public ReportService(IWebHostEnvironment env, ILogger<ReportService> logger, ApplicationDbContext context)
+        {
+            _env = env;
+            _logger = logger;
+            _context = context;
+        }
+
+        // Define a reusable cell style method
+
+
+        public async Task<byte[]> GenerateGeologyReportAsync(DateTime startDate, DateTime endDate, List<string> elements)
+        {
+            try
+            {
+                _logger.LogInformation("Starting report generation from {StartDate} to {EndDate}", startDate, endDate);
+
+                var geologyDepartmentId = await _context.Departments
+                    .Where(d => d.DeptName.Contains("Geology"))
+                    .Select(d => d.Id)
+                    .FirstOrDefaultAsync();
+
+                if (geologyDepartmentId == 0)
+                {
+                    throw new InvalidOperationException("Geology department not found.");
+                }
+
+                _logger.LogInformation("Geology department found with ID {GeologyDepartmentId}", geologyDepartmentId);
+
+                // Fetch data from the database
+                var labResults = await _context.LabResults
+                    .Where(lr => lr.LabRequest.ProductionDate >= startDate && lr.LabRequest.ProductionDate <= endDate && lr.LabRequest.DepartmentId == geologyDepartmentId)
+                    .Include(lr => lr.LabRequest)
+                    .ToListAsync();
+
+                _logger.LogInformation("Fetched {LabResultsCount} lab results for the specified date range.", labResults.Count);
+
+                // If elements list is empty or contains only null values, select all elements
+                if (elements == null || !elements.Any() || elements.All(e => string.IsNullOrEmpty(e)))
+                {
+                    elements = typeof(LabResults).GetProperties()
+                        .Where(prop => prop.PropertyType == typeof(decimal?))
+                        .Select(prop => prop.Name)
+                        .ToList();
+
+                    _logger.LogInformation("No elements specified. Defaulting to all elements.");
+                }
+                else
+                {
+                    // If elements are passed as a comma-separated string, convert it to a list
+                    elements = elements.SelectMany(e => e.Split(',')).ToList();
+                    _logger.LogInformation("Elements specified: {Elements}", string.Join(", ", elements));
+                }
+
+                // Define PDF document
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Margin(50);
+
+                        // Define the header of the PDF
+                        page.Header().Height(100).Background(Colors.White)
+                             .AlignLeft()
+                             .Column(column =>
+                             {
+                                 column.Item().Row(row =>
+                                 {
+                                     row.ConstantItem(100).Image(Path.Combine(_env.WebRootPath, "img", "GMC-LOGO-1.png")); // Add logo
+                                     row.RelativeItem().Column(innerColumn =>
+                                     {
+                                         innerColumn.Item().Text("GMC Geology Report").FontFamily("Times")
+                                             .FontSize(18)
+                                             .Bold()
+                                             .AlignRight();
+                                         if (labResults.Any())
+                                         {
+                                             var productionDate = labResults.First().LabRequest.ProductionDate;
+                                             var dateReported = labResults.First().LabRequest.DateReported;
+
+                                             innerColumn.Item().Text($"Production Date: {productionDate:dd/MMM/yyyy}").FontFamily("Times").FontSize(12).AlignRight(); ;
+                                             innerColumn.Item().Text($"Date Reported: {dateReported:dd/MMM/yyyy}").FontFamily("Times").FontSize(12).AlignRight(); ;
+                                         }
+                                     });
+                                 });
+                             });
+
+                        // Define the content of the PDF
+                        page.Content().Background(Colors.Green.Lighten5)
+                            .PaddingVertical(20)
+                            .Table(table =>
+                            {
+                                // Define columns
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn(); // First column for Prod Date
+                                    foreach (var element in elements)
+                                    {
+                                        columns.RelativeColumn(); // Columns for each selected element
+                                    }
+                                    columns.RelativeColumn(); // Column for Totals
+                                });
+
+                                // Add table headers
+                                table.Header(header =>
+                                {
+                                    header.Cell().Element(CellStyle).Text("Sample Identification").FontSize(8).Italic().Bold();
+                                    foreach (var element in elements)
+                                    {
+                                        header.Cell().Element(CellStyle).Text(element).FontSize(8).Italic().Bold();
+                                    }
+                                    header.Cell().Element(CellStyle).Text("Totals").FontSize(8).Italic().Bold();
+                                });
+
+                                // Add table rows
+                                foreach (var result in labResults)
+                                {
+                                    table.Cell().Element(CellStyle).Text(result.SampleId).FontSize(8);
+                                    foreach (var element in elements)
+                                    {
+                                        var value = GetElementValue(result, element);
+                                        table.Cell().Element(CellStyle).Text(value?.ToString("F2") ?? "0").FontSize(8);
+                                    }
+                                    var total = elements.Sum(element => GetElementValue(result, element) ?? 0);
+                                    table.Cell().Element(CellStyle).Text(total.ToString("F2")).FontSize(8);
+                                }
+
+                                // Add totals row
+                                table.Cell().Element(CellStyle).Text("Totals:").FontSize(8).Italic().Bold();
+                                foreach (var element in elements)
+                                {
+                                    // Count the number of lab results where the element value is greater than zero
+                                    var count = labResults.Count(lr => (GetElementValue(lr, element) ?? 0) > 0);
+
+                                    // Add the count to the table cell
+                                    table.Cell().Element(CellStyle).Text(count.ToString("F2")).FontSize(8).Italic().Bold();
+                                }
+
+                                // Calculate the grand total
+                                var grandTotal = labResults.Count(result => elements.Any(element => (GetElementValue(result, element) ?? 0) > 0));
+
+                                // Add the grand total to the table cell
+                                table.Cell().Element(CellStyle).Text(grandTotal.ToString("F2")).FontSize(8).Italic().Bold();
+
+                            });
+
+                        // Define the footer of the PDF
+                        page.Footer().Height(50).Background(Colors.White)
+                            .AlignCenter()
+                            .Text($"Report generated on {DateTime.Now:dd-MMM-yyyy}");
+                    });
+                });
+
+                // Generate PDF file
+                byte[] pdfData;
+                using (var stream = new MemoryStream())
+                {
+                    document.GeneratePdf(stream);
+                    pdfData = stream.ToArray();
+                }
+
+                _logger.LogInformation("Report generated successfully from {StartDate} to {EndDate}", startDate, endDate);
+                return pdfData;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while generating the report.");
+                throw;
+            }
+        }
+
+
+        private decimal? GetElementValue(LabResults result, string elementName)
+        {
+            return elementName switch
+            {
+                "Mn" => result.Mn,
+                "Fe" => result.Fe,
+                "SiO2" => result.SiO2,
+                "B" => result.B,
+                "Sol_Mn" => result.Sol_Mn,
+                "MnO2" => result.MnO2,
+                "P" => result.P,
+                "Al2O3" => result.Al2O3,
+                "Mg" => result.Mg,
+                "CaO" => result.CaO,
+                "Au" => result.Au,
+                "H2O" => result.H2O,
+                "MgO" => result.MgO,
+                "As" => result.As,
+                _ => null
+            };
+        }
+
+        private static IContainer CellStyle(IContainer container) =>
+            container.BorderBottom(1).BorderColor(Colors.Grey.Lighten2).PaddingVertical(5).PaddingHorizontal(2);
+
+        public async Task<byte[]> GenerateMetReportAsync(DateTime startDate, DateTime endDate, List<string> elements, string description)
+        {
+            // Implementation for generating met report
+            return null;
+        }
+
+        public async Task<byte[]> GenerateDailyReportAsync(DateTime startDate, DateTime endDate, List<string> selectedPlantIds)
+        {
+            // Implementation for generating daily report
+            return null;
+        }
+
+        public List<SelectListItem> GetElementNames()
+        {
+            var elementNames = typeof(LabResults).GetProperties()
+                .Where(prop => prop.PropertyType == typeof(decimal?))
+                .Select(prop => new SelectListItem
+                {
+                    Value = prop.Name,
+                    Text = prop.Name
+                })
+                .ToList();
+
+            return elementNames;
+        }
+
+        public List<string> SearchJobNumbers(string term)
+        {
+            return _context.LabRequests
+                .Where(lr => lr.JobNumber.Contains(term))
+                .Select(lr => lr.JobNumber)
+                .Distinct()
+                .ToList();
+        }
+    }
+}

@@ -1,32 +1,19 @@
 ﻿using AsseyLabMgt.Data;
-using AsseyLabMgt.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using QuestPDF.Fluent;
-using QuestPDF.Infrastructure;
-using QuestPDF.Previewer;
-using AsseyLabMgt.Data;
-using Microsoft.AspNetCore.Hosting;
-using Newtonsoft.Json;
 
-namespace AsseyLabMgt.Utils
+namespace AsseyLabMgt.Services
 {
-    public class ReportService
+    public class StatisticsService
     {
         private readonly IWebHostEnvironment _env;
-        private readonly ILogger<ReportService> _logger;
+        private readonly ILogger<StatisticsService> _logger;
         private readonly ApplicationDbContext _context;
 
-        public ReportService(IWebHostEnvironment env, ILogger<ReportService> logger, ApplicationDbContext context)
+        public StatisticsService(IWebHostEnvironment env, ILogger<StatisticsService> logger, ApplicationDbContext context)
         {
             _env = env;
             _logger = logger;

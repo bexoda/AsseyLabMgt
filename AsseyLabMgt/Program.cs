@@ -1,7 +1,6 @@
 using AsseyLabMgt.Data;
 using AsseyLabMgt.Models;
-using AsseyLabMgt.Utils;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using AsseyLabMgt.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
@@ -39,6 +38,7 @@ builder.Services.AddDefaultIdentity<AppUser>(options =>
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddScoped<StatisticsService>();
 builder.Services.AddScoped<ReportService>();
 
 builder.Services.AddControllersWithViews();

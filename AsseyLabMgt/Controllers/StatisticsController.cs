@@ -1,30 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using AsseyLabMgt.Data;
+﻿using AsseyLabMgt.Data;
 using AsseyLabMgt.Models;
-using Microsoft.Extensions.Logging;
+using AsseyLabMgt.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using AsseyLabMgt.Utils;
+using Microsoft.EntityFrameworkCore;
 
 namespace AsseyLabMgt.Controllers
 {
     [Authorize]
-    public class ReportController : Controller
+    public class StatisticsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly ReportService _reportService;
-        private readonly ILogger<ReportController> _logger;
+        private readonly StatisticsService _statisticsService;
+        private readonly ILogger<StatisticsController> _logger;
 
-        public ReportController(ApplicationDbContext context, ILogger<ReportController> logger, ReportService reportService)
+        public StatisticsController(ApplicationDbContext context, ILogger<StatisticsController> logger, StatisticsService statisticsService)
         {
             _context = context;
             _logger = logger;
-            _reportService = reportService;
+            _statisticsService = statisticsService;
         }
 
         // GET: Report
@@ -36,7 +31,7 @@ namespace AsseyLabMgt.Controllers
                 Text = ps.PlantSourceName
             }).ToListAsync();
 
-            var model = new ReportViewModel
+            var model = new StatisticViewModel
             {
                 Plants = plants
             };
@@ -46,7 +41,7 @@ namespace AsseyLabMgt.Controllers
 
         // POST: Report/Generate
         [HttpPost]
-        public async Task<IActionResult> Generate(ReportViewModel model)
+        public async Task<IActionResult> Generate(StatisticViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -54,7 +49,7 @@ namespace AsseyLabMgt.Controllers
                 {
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
-                    var reportBytes = await _reportService.GenerateGeologyReportAsync(model.StartDate, model.EndDate);
+                    var reportBytes = await _statisticsService.GenerateGeologyReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"GeoDaily-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)
@@ -68,7 +63,7 @@ namespace AsseyLabMgt.Controllers
 
         // POST: Report/GenerateSamplesReceived
         [HttpPost]
-        public async Task<IActionResult> GenerateSamplesReceived(ReportViewModel model)
+        public async Task<IActionResult> GenerateSamplesReceived(StatisticViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -76,7 +71,7 @@ namespace AsseyLabMgt.Controllers
                 {
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
-                    var reportBytes = await _reportService.GenerateSamplesReceivedReportAsync(model.StartDate, model.EndDate);
+                    var reportBytes = await _statisticsService.GenerateSamplesReceivedReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"DailySamples-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)
@@ -90,7 +85,7 @@ namespace AsseyLabMgt.Controllers
 
         // POST: Report/GenerateYearToDateSamplesReceived
         [HttpPost]
-        public async Task<IActionResult> GenerateYearToDateSamplesReceived(ReportViewModel model)
+        public async Task<IActionResult> GenerateYearToDateSamplesReceived(StatisticViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -98,7 +93,7 @@ namespace AsseyLabMgt.Controllers
                 {
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
-                    var reportBytes = await _reportService.GenerateYearToDateSamplesReceivedReportAsync(model.StartDate, model.EndDate);
+                    var reportBytes = await _statisticsService.GenerateYearToDateSamplesReceivedReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"MonthSamples-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)
@@ -112,7 +107,7 @@ namespace AsseyLabMgt.Controllers
 
         // POST: Report/GenerateYearToDateAnalysisStatistics
         [HttpPost]
-        public async Task<IActionResult> GenerateYearToDateAnalysisStatistics(ReportViewModel model)
+        public async Task<IActionResult> GenerateYearToDateAnalysisStatistics(StatisticViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -120,7 +115,7 @@ namespace AsseyLabMgt.Controllers
                 {
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
-                    var reportBytes = await _reportService.GenerateYearToDateAnalysisStatisticsReportAsync(model.StartDate, model.EndDate);
+                    var reportBytes = await _statisticsService.GenerateYearToDateAnalysisStatisticsReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"MonthsTotals-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)
@@ -134,7 +129,7 @@ namespace AsseyLabMgt.Controllers
 
         // POST: Report/GenerateMetReport
         [HttpPost]
-        public async Task<IActionResult> GenerateMetReport(ReportViewModel model)
+        public async Task<IActionResult> GenerateMetReport(StatisticViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -142,7 +137,7 @@ namespace AsseyLabMgt.Controllers
                 {
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
-                    var reportBytes = await _reportService.GenerateMetReportAsync(model.StartDate, model.EndDate);
+                    var reportBytes = await _statisticsService.GenerateMetReportAsync(model.StartDate, model.EndDate);
                     return File(reportBytes, "application/pdf", $"MetDaily-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)
@@ -156,7 +151,7 @@ namespace AsseyLabMgt.Controllers
 
         // POST: Report/GeneratePlantReport
         [HttpPost]
-        public async Task<IActionResult> GeneratePlantReport(ReportViewModel model)
+        public async Task<IActionResult> GeneratePlantReport(StatisticViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -165,7 +160,7 @@ namespace AsseyLabMgt.Controllers
                     model.StartDate = model.StartDate.ToUniversalTime();
                     model.EndDate = model.EndDate.ToUniversalTime();
                     var selectedPlantIds = model.SelectedPlantIds ?? new List<int>();
-                    var pdfData = await _reportService.GeneratePlantReportAsync(model.StartDate, model.EndDate, selectedPlantIds);
+                    var pdfData = await _statisticsService.GeneratePlantReportAsync(model.StartDate, model.EndDate, selectedPlantIds);
                     return File(pdfData, "application/pdf", $"PlantDailyReport-{DateTime.Now:yyyyMMddHHmmss}.pdf");
                 }
                 catch (Exception ex)

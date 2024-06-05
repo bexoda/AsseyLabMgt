@@ -72,13 +72,13 @@ namespace AsseyLabMgt.Controllers
                             ModelState.AddModelError("", "Please provide a description for the Met Report.");
                             return View("Index", model);
                         }
-                        //reportData = await _reportService.GenerateMetReportAsync(model.StartDate, model.EndDate, model.SelectedElements, model.Description);
-                        fileName = "MetReport.pdf";
+                        reportData = await _reportService.GenerateMetReportAsync(model.StartDate, model.EndDate, model.SelectedElements, model.Description, model.JobNumber);
+                        fileName = $"MetReport-{model.StartDate:yyyy-MM-dd}.pdf";
                         break;
 
                     case "DailyReport":
-                        //reportData = await _reportService.GenerateDailyReportAsync(model.StartDate, model.EndDate, model.SelectedElements, model.SelectedPlantIds);
-                        fileName = "DailyReport.pdf";
+                        reportData = await _reportService.GenerateDailyReportAsync(model.StartDate, model.SelectedPlantIds, model.SelectedElements);
+                        fileName = $"DailyReport.pdf-{model.StartDate:yyyy-MM-dd}.pdf";
                         break;
 
                     default:

@@ -185,6 +185,175 @@ namespace AsseyLabMgt.Services
         }
 
 
+        public async Task<byte[]> GenerateDailyReportAsync(DateTime startDate, List<int> selectedPlantIds, List<string> elements)
+        {
+            try
+            {
+                _logger.LogInformation("Starting daily report generation for date: {StartDate}", startDate);
+
+                // Fetch lab results based on the selected plant IDs and the start date
+                var labResults = await _context.LabResults
+                    .Where(lr => lr.LabRequest.ProductionDate == startDate && selectedPlantIds.Contains(lr.LabRequest.PlantSourceId))
+                    .Include(lr => lr.LabRequest)
+                    .ThenInclude(lr => lr.PlantSource)
+                    .OrderBy(lr => lr.LabRequest.PlantSource.PlantSourceName)
+                    .ToListAsync();
+
+                if (!labResults.Any())
+                {
+                    _logger.LogWarning("No lab results found for the given date and plant sources.");
+                    throw new InvalidOperationException("No lab results found for the given date and plant sources.");
+                }
+
+                // If elements list is empty or contains only null values, select all elements
+                if (elements == null || !elements.Any() || elements.All(e => string.IsNullOrEmpty(e)))
+                {
+                    elements = typeof(LabResults).GetProperties()
+                        .Where(prop => prop.PropertyType == typeof(decimal?))
+                        .Select(prop => prop.Name)
+                        .ToList();
+                    _logger.LogInformation("Elements not specified, selecting all elements: {Elements}", string.Join(", ", elements));
+                }
+                else
+                {
+                    // If elements are passed as a comma-separated string, convert it to a list
+                    elements = elements.SelectMany(e => e.Split(',')).ToList();
+                    _logger.LogInformation("Elements specified: {Elements}", string.Join(", ", elements));
+                }
+
+                // Group the lab results by plant source
+                var groupedResults = labResults
+                    .Where(lr => lr.LabRequest?.PlantSource != null)
+                    .GroupBy(lr => lr.LabRequest.PlantSource.PlantSourceName);
+
+                if (!groupedResults.Any())
+                {
+                    _logger.LogWarning("No lab results were grouped by plant source.");
+                    throw new InvalidOperationException("No lab results were grouped by plant source.");
+                }
+
+                // Define PDF document
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4.Landscape()); // Set the page size to A4 landscape
+                        page.Margin(50);
+
+                        // Define the header of the PDF
+                        page.Header().Height(100).Background(Colors.White)
+                            .AlignLeft()
+                            .Column(column =>
+                            {
+                                column.Item().Row(row =>
+                                {
+                                    row.ConstantItem(100).Image(Path.Combine(_env.WebRootPath, "img", "GMC-LOGO-1.png")); // Add logo
+                                    row.RelativeItem().Column(innerColumn =>
+                                    {
+                                        innerColumn.Item().Text("GMC Daily Assays").FontFamily("Times")
+                                            .FontSize(18)
+                                            .Bold()
+                                            .AlignRight();
+                                        if (labResults.Any())
+                                        {
+                                            var productionDate = labResults.First().LabRequest.ProductionDate;
+                                            var dateReported = labResults.First().LabRequest.DateReported;
+
+                                            innerColumn.Item().Text($"Production Date: {productionDate:dd-MMM-yyyy}").FontFamily("Times").FontSize(12).AlignRight();
+                                            innerColumn.Item().Text($"Date Reported: {dateReported:dd-MMM-yyyy}").FontFamily("Times").FontSize(12).AlignRight();
+                                        }
+                                    });
+                                });
+                            });
+
+                        // Define the content of the PDF
+                        page.Content().Background(Colors.Green.Lighten5)
+                            .PaddingVertical(20)
+                            .Table(table =>
+                            {
+                                // Define columns
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn(); // First column for Plant Source
+                                    columns.RelativeColumn(); // Column for Time
+                                    columns.RelativeColumn(); // Column for Sample ID
+                                    foreach (var element in elements)
+                                    {
+                                        columns.RelativeColumn(); // Columns for each selected element
+                                    }
+                                });
+
+                                // Add table headers
+                                table.Header(header =>
+                                {
+                                    header.Cell().Element(CellStyle).Text("Plant/Source").FontSize(8).Italic().Bold();
+                                    header.Cell().Element(CellStyle).Text("Time").FontSize(8).Italic().Bold();
+                                    header.Cell().Element(CellStyle).Text("Sample Identification").FontSize(8).Italic().Bold();
+                                    foreach (var element in elements)
+                                    {
+                                        header.Cell().Element(CellStyle).Text(element).FontSize(8).Italic().Bold();
+                                    }
+                                });
+
+                                // Add table rows and totals for each plant source
+                                foreach (var group in groupedResults)
+                                {
+                                    decimal[] plantTotals = new decimal[elements.Count];
+                                    _logger.LogInformation("Processing group for Plant Source: {PlantSource}", group.Key);
+
+                                    foreach (var result in group)
+                                    {
+                                        table.Cell().Element(CellStyle).Text(result.LabRequest.PlantSource.PlantSourceName).FontSize(8);
+                                        table.Cell().Element(CellStyle).Text(result.LabRequest.TimeReceived.ToString("HH:mm")).FontSize(8);
+                                        table.Cell().Element(CellStyle).Text(result.SampleId).FontSize(8);
+
+                                        for (int i = 0; i < elements.Count; i++)
+                                        {
+
+                                            var element = elements[i];
+                                            var value = GetElementValue(result, element);
+                                            plantTotals[i] += value ?? 0;
+                                            table.Cell().Element(CellStyle).Text(value?.ToString("F2") ?? "0").FontSize(8);
+                                        }
+                                    }
+
+                                    // Add totals row for each plant source
+                                    table.Cell().Element(CellStyle).Text("Totals:").FontSize(8).Italic().Bold();
+                                    table.Cell().Element(CellStyle).Text("-").FontSize(8).Italic().Bold();
+                                    table.Cell().Element(CellStyle).Text("-").FontSize(8).Italic().Bold();
+                                    foreach (var total in plantTotals)
+                                    {
+                                        table.Cell().Element(CellStyle).Text(plantTotals.Count().ToString("F2")).FontSize(8).Italic().Bold();
+                                    }
+                                }
+
+                            });
+
+                        // Define the footer of the PDF
+                        page.Footer().Height(50).Background(Colors.White)
+                            .AlignCenter()
+                            .Text($"Report generated on {DateTime.Now:dd-MMM-yyyy}");
+                    });
+                });
+
+                // Generate PDF file
+                byte[] pdfData;
+                using (var stream = new MemoryStream())
+                {
+                    document.GeneratePdf(stream);
+                    pdfData = stream.ToArray();
+                }
+
+                _logger.LogInformation("Daily report generated successfully for {StartDate}", startDate);
+                return pdfData;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while generating the daily report: {Message}", ex.Message);
+                throw;
+            }
+        }
+
         private decimal? GetElementValue(LabResults result, string elementName)
         {
             return elementName switch
@@ -210,17 +379,178 @@ namespace AsseyLabMgt.Services
         private static IContainer CellStyle(IContainer container) =>
             container.BorderBottom(1).BorderColor(Colors.Grey.Lighten2).PaddingVertical(5).PaddingHorizontal(2);
 
-        public async Task<byte[]> GenerateMetReportAsync(DateTime startDate, DateTime endDate, List<string> elements, string description)
+        public async Task<byte[]> GenerateMetReportAsync(DateTime startDate, DateTime endDate, List<string> elements, string description, string jobNumber)
         {
-            // Implementation for generating met report
-            return null;
+            try
+            {
+                _logger.LogInformation("Starting MET report generation from {StartDate} to {EndDate} for Job Number: {JobNumber}", startDate, endDate, jobNumber);
+
+                // Create the base query
+                var labResultsQuery = _context.LabResults
+                    .Where(lr => lr.LabRequest.ProductionDate >= startDate && lr.LabRequest.ProductionDate <= endDate)
+                    .Include(lr => lr.LabRequest)
+                    .OrderBy(lr => lr.LabRequest.ProductionDate)
+                    .AsQueryable();
+
+                // Add job number filter if provided
+                if (!string.IsNullOrEmpty(jobNumber))
+                {
+                    labResultsQuery = labResultsQuery.Where(lr => lr.LabRequest.JobNumber == jobNumber);
+                }
+
+                // Fetch lab results
+                var labResults = await labResultsQuery.ToListAsync();
+
+                if (!labResults.Any())
+                {
+                    _logger.LogWarning("No lab results found for the given date range and job number.");
+                    throw new InvalidOperationException("No lab results found for the given date range and job number.");
+                }
+
+                // If elements list is empty or contains only null values, select all elements
+                if (elements == null || !elements.Any() || elements.All(e => string.IsNullOrEmpty(e)))
+                {
+                    elements = typeof(LabResults).GetProperties()
+                        .Where(prop => prop.PropertyType == typeof(decimal?))
+                        .Select(prop => prop.Name)
+                        .ToList();
+                    _logger.LogInformation("Elements not specified, selecting all elements: {Elements}", string.Join(", ", elements));
+                }
+                else
+                {
+                    // If elements are passed as a comma-separated string, convert it to a list
+                    elements = elements.SelectMany(e => e.Split(',')).ToList();
+                    _logger.LogInformation("Elements specified: {Elements}", string.Join(", ", elements));
+                }
+
+                // Define PDF document
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4.Landscape()); // Set the page size to A4 landscape
+                        page.Margin(50);
+
+                        // Define the header of the PDF
+                        page.Header().Height(100).Background(Colors.White)
+                            .AlignLeft()
+                            .Column(column =>
+                            {
+                                column.Item().Row(row =>
+                                {
+                                    row.ConstantItem(100).Image(Path.Combine(_env.WebRootPath, "img", "GMC-LOGO-1.png")); // Add logo
+                                    row.RelativeItem().Column(innerColumn =>
+                                    {
+                                        innerColumn.Item().Text("GMC Met Report").FontFamily("Times")
+                                            .FontSize(18)
+                                            .Bold()
+                                            .AlignRight();
+                                    });
+                                  
+                                });
+
+                                column.Item().Row(row =>
+                                {
+                                    row.RelativeItem().Column(innerColumn =>
+                                    {
+                                        innerColumn.Item().Text(description).FontFamily("Times")
+                                            .FontSize(18)
+                                            .Bold()
+                                            .AlignLeft()
+                                            .Underline();
+                                    });
+
+                                    row.RelativeItem().Column(innerColumn =>
+                                    {
+                                        if (!string.IsNullOrEmpty(jobNumber))
+                                        {
+                                            innerColumn.Item().Text($"Job Number: {jobNumber}").FontFamily("Times").FontSize(12).AlignRight();
+                                        }
+                                        if (labResults.Any())
+                                        {
+                                            var productionDate = labResults.First().LabRequest.ProductionDate;
+                                            var dateReported = labResults.First().LabRequest.DateReported;
+
+                                          
+
+                                            innerColumn.Item().Text($"Production Date: {productionDate:dd-MMM-yyyy}").FontFamily("Times").FontSize(12).AlignRight();
+                                            //innerColumn.Item().Text($"Date Reported: {dateReported:dd-MMM-yyyy}").FontFamily("Times").FontSize(12).AlignRight();
+                                        }
+                                    });
+                                });
+                            });
+
+                        // Define the content of the PDF
+                        page.Content().Background(Colors.Green.Lighten5)
+                            .PaddingVertical(20)
+                            .Table(table =>
+                            {
+                                // Define columns
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn(); // First column for Sample ID
+                                    foreach (var element in elements)
+                                    {
+                                        columns.RelativeColumn(); // Columns for each selected element
+                                    }
+                                });
+
+                                // Add table headers
+                                table.Header(header =>
+                                {
+                                    header.Cell().Element(CellStyle).Text("Sample Identification").FontSize(8).Italic().Bold();
+                                    foreach (var element in elements)
+                                    {
+                                        header.Cell().Element(CellStyle).Text("%" + element).FontSize(8).Italic().Bold();
+                                    }
+                                });
+
+                                // Add table rows and totals for each lab result
+                                foreach (var result in labResults)
+                                {
+                                    table.Cell().Element(CellStyle).Text(result.SampleId).FontSize(8);
+                                    foreach (var element in elements)
+                                    {
+                                        var value = GetElementValue(result, element);
+                                        table.Cell().Element(CellStyle).Text(value?.ToString("F2") ?? "0").FontSize(8);
+                                    }
+                                }
+
+                                // Add grand totals row
+                                table.Cell().Element(CellStyle).Text("Grand Totals:").FontSize(8).Italic().Bold();
+                                foreach (var element in elements)
+                                {
+                                    var grandTotal = labResults.Sum(lr => GetElementValue(lr, element) ?? 0);
+                                    table.Cell().Element(CellStyle).Text(grandTotal.ToString("F2")).FontSize(8).Italic().Bold();
+                                }
+                            });
+
+                        // Define the footer of the PDF
+                        page.Footer().Height(50).Background(Colors.White)
+                            .AlignCenter()
+                            .Text($"Report generated on {DateTime.Now:dd-MMM-yyyy}");
+                    });
+                });
+
+                // Generate PDF file
+                byte[] pdfData;
+                using (var stream = new MemoryStream())
+                {
+                    document.GeneratePdf(stream);
+                    pdfData = stream.ToArray();
+                }
+
+                _logger.LogInformation("MET report generated successfully from {StartDate} to {EndDate} for Job Number: {JobNumber}", startDate, endDate, jobNumber);
+                return pdfData;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while generating the MET report: {Message}", ex.Message);
+                throw;
+            }
         }
 
-        public async Task<byte[]> GenerateDailyReportAsync(DateTime startDate, DateTime endDate, List<string> selectedPlantIds)
-        {
-            // Implementation for generating daily report
-            return null;
-        }
+
 
         public List<SelectListItem> GetElementNames()
         {

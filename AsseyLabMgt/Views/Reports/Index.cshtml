@@ -83,7 +83,9 @@
             <input type="hidden" name="reportType" value="DailyReport" />
             <input type="hidden" name="StartDate" />
             <input type="hidden" name="EndDate" />
-            <input type="hidden" name="SelectedPlantIds" />
+            <input type="hidden" name="JobNumber" />
+            <input type="hidden" name="Description" />
+            <input type="hidden" name="SelectedElements" />
             <div class="form-group">
                 <label for="plants">Select Plants:</label>
                 <select class="select2" multiple="multiple" data-placeholder="Select a Plant source" data-dropdown-css-class="select2-purple" id="plants" name="SelectedPlantIds" asp-for="SelectedPlantIds" asp-items="Model.Plants" style="width: 100%;"></select>

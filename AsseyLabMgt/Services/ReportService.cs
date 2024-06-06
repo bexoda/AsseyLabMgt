@@ -72,6 +72,7 @@ namespace AsseyLabMgt.Services
                 {
                     container.Page(page =>
                     {
+                        page.Size(PageSizes.A4.Landscape());
                         page.Margin(50);
 
                         // Define the header of the PDF

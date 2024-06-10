@@ -95,11 +95,62 @@ namespace AsseyLabMgt.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> GenerateGeologyReport(ReportViewModel model, string reportType)
+        {
+            if (model.StartDate == default || model.SelectedElements == null || !model.SelectedElements.Any())
+            {
+                ModelState.AddModelError("", "Please provide valid inputs.");
+                return View("Geology", model);
+            }
+
+            try
+            {
+                byte[] reportData;
+                string fileName;
+
+                if (model.SelectedElements == null || !model.SelectedElements.Any())
+                {
+                    // If no elements are selected, select all available elements
+                    model.SelectedElements = _reportService.GetElementNames().Select(e => e.Value).ToList();
+                }
+
+                reportData = await _reportService.GenerateGeologyReportAsync(model.StartDate, model.EndDate, model.SelectedElements);
+                fileName = $"GeologyReport-{model.StartDate:yyyy-MM-dd}.pdf";
+
+                return File(reportData, "application/pdf", fileName);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "An error occurred while generating the report. " + ex.Message);
+                return View("Geology", model);
+            }
+        }
+
         [HttpGet]
         public JsonResult SearchJobNumbers(string term)
         {
             var jobNumbers = _reportService.SearchJobNumbers(term);
             return Json(jobNumbers);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Geology()
+        {
+            var elementNames = _reportService.GetElementNames();
+            var plants = await _context.PlantSources.Select(ps => new SelectListItem
+            {
+                Value = ps.Id.ToString(),
+                Text = ps.PlantSourceName
+            }).ToListAsync();
+
+            var model = new ReportViewModel
+            {
+                ElementList = elementNames,
+                Plants = plants
+            };
+
+            return View(model);
         }
     }
 }

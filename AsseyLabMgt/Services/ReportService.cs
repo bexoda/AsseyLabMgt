@@ -24,7 +24,7 @@ namespace AsseyLabMgt.Services
         // Define a reusable cell style method
 
 
-        public async Task<byte[]> GenerateGeologyReportAsync(DateTime startDate, DateTime endDate, List<string> elements)
+        public async Task<byte[]> GenerateGeologyReportAsync(DateTime startDate, DateTime? endDate, List<string> elements)
         {
             try
             {

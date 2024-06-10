@@ -1,0 +1,95 @@
+﻿@model ReportViewModel
+
+@{
+    ViewData["Title"] = "Geology Report";
+}
+
+<h1>Reports</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="startDate">Production Date</label>
+            <input type="date" class="form-control" id="startDate" name="StartDate" placeholder="dd/mm/yyyy" required />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input type="date" class="form-control" id="endDate" name="EndDate" placeholder="dd/mm/yyyy" required />
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="jobNumber">Job Number:</label>
+            <input type="text" id="jobNumber" name="JobNumber" placeholder="Please Enter a job number" class="form-control" asp-for="JobNumber" />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="elements">Select Elements:</label>
+            <select class="select2" multiple="multiple" data-placeholder="Select a Compound" data-dropdown-css-class="select2-purple" id="elements" name="SelectedElements" asp-for="SelectedElements" asp-items="Model.ElementList" style="width: 100%;"></select>
+        </div>
+    </div>
+    <div class="col-md-6">
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="GenerateReport" method="post" onsubmit="setHiddenFields(this)">
+            <input type="hidden" name="reportType" value="GeologyReport" />
+            <input type="hidden" name="StartDate" />
+            <input type="hidden" name="EndDate" />
+            <input type="hidden" name="ReportDate" />
+            <input type="hidden" name="JobNumber" />
+            <input type="hidden" name="SelectedElements" />
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-chart-bar"></i> Generate Geology Report
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            // Initialize Select2 Elements
+            $('.select2').select2();
+
+            // Initialize autocomplete for job number
+            $("#jobNumber").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '@Url.Action("SearchJobNumbers")',
+                        data: { term: request.term },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2
+            });
+        });
+
+        function setHiddenFields(form) {
+            $(form).find('input[name="StartDate"]').val($('#startDate').val());
+            $(form).find('input[name="EndDate"]').val($('#endDate').val());
+            $(form).find('input[name="JobNumber"]').val($('#jobNumber').val());
+            var selectedElements = $('#elements').val();
+            $(form).find('input[name="SelectedElements"]').val(selectedElements ? selectedElements.join() : "");
+        }
+    </script>
+}

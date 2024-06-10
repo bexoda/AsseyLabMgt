@@ -78,7 +78,7 @@ namespace AsseyLabMgt.Controllers
 
                     case "DailyReport":
                         reportData = await _reportService.GenerateDailyReportAsync(model.StartDate, model.SelectedPlantIds, model.SelectedElements);
-                        fileName = $"DailyReport.pdf-{model.StartDate:yyyy-MM-dd}.pdf";
+                        fileName = $"DailyReport-{model.StartDate:yyyy-MM-dd}.pdf";
                         break;
 
                     default:

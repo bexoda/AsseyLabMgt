@@ -1,7 +1,7 @@
 ﻿@model ReportViewModel
 
 @{
-    ViewData["Title"] = "Geology Report";
+    ViewData["Title"] = "Daily Report";
 }
 
 <h1>Reports</h1>
@@ -9,32 +9,18 @@
 <div class="row">
     <div class="col-md-6">
         <div class="form-group">
-            <label for="startDate">Production Start Date</label>
+            <label for="startDate">Production Date</label>
             <input type="date" class="form-control" id="startDate" name="StartDate" placeholder="dd/mm/yyyy" required />
         </div>
     </div>
-</div>
 
-<div class="row">
     <div class="col-md-6">
         <div class="form-group">
-            <label for="endDate">Production Date Range </label>
-            <input type="date" class="form-control" id="endDate" name="EndDate" placeholder="dd/mm/yyyy" required />
+            <label for="description">Description:</label>
+            <input type="text" id="description" name="Description" class="form-control" asp-for="Description" placeholder="Enter description" />
         </div>
     </div>
 </div>
-
-
-
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label for="jobNumber">Job Number:</label>
-            <input type="text" id="jobNumber" name="JobNumber" placeholder="Please Enter a job number" class="form-control" asp-for="JobNumber" />
-        </div>
-    </div>
-</div>
-
 <div class="row">
     <div class="col-md-6">
         <div class="form-group">
@@ -47,16 +33,18 @@
 </div>
 
 <div class="row">
-    <div class="col-md-6">
-        <form asp-action="GenerateReport" method="post" onsubmit="setHiddenFields(this)">
-            <input type="hidden" name="reportType" value="GeologyReport" />
+    <div class="col-md-12">
+        <form asp-action="GenerateDailyReport" method="post" onsubmit="setHiddenFields(this)">
+            <input type="hidden" name="reportType" value="DailyReport" />
             <input type="hidden" name="StartDate" />
-            <input type="hidden" name="EndDate" />
-            <input type="hidden" name="ReportDate" />
-            <input type="hidden" name="JobNumber" />
+            <input type="hidden" name="Description" />
             <input type="hidden" name="SelectedElements" />
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-chart-bar"></i> Generate Geology Report
+            <div class="form-group">
+                <label for="plants">Select Plants:</label>
+                <select class="select2" multiple="multiple" data-placeholder="Select a Plant source" data-dropdown-css-class="select2-purple" id="plants" name="SelectedPlantIds" asp-for="SelectedPlantIds" asp-items="Model.Plants" style="width: 100%;"></select>
+            </div>
+            <button type="submit" class="btn btn-dark btn-block">
+                <i class="fas fa-leaf"></i> Generate Daily Report
             </button>
         </form>
     </div>
@@ -86,8 +74,7 @@
 
         function setHiddenFields(form) {
             $(form).find('input[name="StartDate"]').val($('#startDate').val());
-            $(form).find('input[name="EndDate"]').val($('#endDate').val());
-            $(form).find('input[name="JobNumber"]').val($('#jobNumber').val());
+            $(form).find('input[name="Description"]').val($('#description').val());
             var selectedElements = $('#elements').val();
             $(form).find('input[name="SelectedElements"]').val(selectedElements ? selectedElements.join() : "");
         }

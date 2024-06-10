@@ -1,7 +1,7 @@
 ﻿@model ReportViewModel
 
 @{
-    ViewData["Title"] = "Create Report";
+    ViewData["Title"] = "Met Report";
 }
 
 <h1>Reports</h1>
@@ -35,13 +35,12 @@
         </div>
     </div>
 </div>
+
 <div class="row">
     <div class="col-md-6">
         <div class="form-group">
             <label for="elements">Select Elements:</label>
             <select class="select2" multiple="multiple" data-placeholder="Select a Compound" data-dropdown-css-class="select2-purple" id="elements" name="SelectedElements" asp-for="SelectedElements" asp-items="Model.ElementList" style="width: 100%;"></select>
-       
-
         </div>
     </div>
     <div class="col-md-6">
@@ -49,19 +48,6 @@
 </div>
 
 <div class="row">
-    <div class="col-md-6">
-        <form asp-action="GenerateReport" method="post" onsubmit="setHiddenFields(this)">
-            <input type="hidden" name="reportType" value="GeologyReport" />
-            <input type="hidden" name="StartDate" />
-            <input type="hidden" name="EndDate" />
-            <input type="hidden" name="JobNumber" />
-            <input type="hidden" name="Description" />
-            <input type="hidden" name="SelectedElements" />
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-chart-bar"></i> Generate Geology Report
-            </button>
-        </form>
-    </div>
     <div class="col-md-6">
         <form asp-action="GenerateReport" method="post" onsubmit="setHiddenFields(this)">
             <input type="hidden" name="reportType" value="MetReport" />
@@ -72,26 +58,6 @@
             <input type="hidden" name="SelectedElements" />
             <button type="submit" class="btn btn-danger">
                 <i class="fas fa-file-pdf"></i> Generate Met Report
-            </button>
-        </form>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-12">
-        <form asp-action="GenerateReport" method="post" onsubmit="setHiddenFields(this)">
-            <input type="hidden" name="reportType" value="DailyReport" />
-            <input type="hidden" name="StartDate" />
-            <input type="hidden" name="EndDate" />
-            <input type="hidden" name="JobNumber" />
-            <input type="hidden" name="Description" />
-            <input type="hidden" name="SelectedElements" />
-            <div class="form-group">
-                <label for="plants">Select Plants:</label>
-                <select class="select2" multiple="multiple" data-placeholder="Select a Plant source" data-dropdown-css-class="select2-purple" id="plants" name="SelectedPlantIds" asp-for="SelectedPlantIds" asp-items="Model.Plants" style="width: 100%;"></select>
-            </div>
-            <button type="submit" class="btn btn-dark btn-block">
-                <i class="fas fa-leaf"></i> Generate Daily Report
             </button>
         </form>
     </div>

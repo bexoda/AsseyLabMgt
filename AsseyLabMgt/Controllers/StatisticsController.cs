@@ -153,23 +153,22 @@ namespace AsseyLabMgt.Controllers
         [HttpPost]
         public async Task<IActionResult> GeneratePlantReport(StatisticViewModel model)
         {
-            if (ModelState.IsValid)
+
+            try
             {
-                try
-                {
-                    model.StartDate = model.StartDate.ToUniversalTime();
-                    model.EndDate = model.EndDate.ToUniversalTime();
-                    var selectedPlantIds = model.SelectedPlantIds ?? new List<int>();
-                    var pdfData = await _statisticsService.GeneratePlantReportAsync(model.StartDate, model.EndDate, selectedPlantIds);
-                    return File(pdfData, "application/pdf", $"PlantDailyReport-{DateTime.Now:yyyyMMddHHmmss}.pdf");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "An error occurred while generating the plant report.");
-                    ModelState.AddModelError("", "An error occurred while generating the plant report. Please try again later.");
-                }
+                model.StartDate = model.StartDate.ToUniversalTime();
+                model.EndDate = model.EndDate.ToUniversalTime();
+                var selectedPlantIds = model.SelectedPlantIds ?? new List<int>();
+                var pdfData = await _statisticsService.GeneratePlantReportAsync(model.StartDate, model.EndDate, selectedPlantIds);
+                return File(pdfData, "application/pdf", $"PlantDailyReport-{DateTime.Now:yyyyMMddHHmmss}.pdf");
             }
-            return View("Index", model);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while generating the plant report.");
+                ModelState.AddModelError("", "An error occurred while generating the plant report. Please try again later.");
+                return View("Index", model);
+            }
+
         }
     }
 }

@@ -20,6 +20,8 @@ namespace AsseyLabMgt.Controllers
             _logger = logger;
         }
 
+        #region Index pages not in use 
+        /*
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -94,6 +96,27 @@ namespace AsseyLabMgt.Controllers
                 return View("Index", model);
             }
         }
+        */
+        #endregion
+
+        [HttpGet]
+        public async Task<IActionResult> Geology()
+        {
+            var elementNames = _reportService.GetElementNames();
+            var plants = await _context.PlantSources.Select(ps => new SelectListItem
+            {
+                Value = ps.Id.ToString(),
+                Text = ps.PlantSourceName
+            }).ToListAsync();
+
+            var model = new ReportViewModel
+            {
+                ElementList = elementNames,
+                Plants = plants
+            };
+
+            return View(model);
+        }
 
         [HttpPost]
         public async Task<IActionResult> GenerateGeologyReport(ReportViewModel model, string reportType)
@@ -135,46 +158,7 @@ namespace AsseyLabMgt.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Geology()
-        {
-            var elementNames = _reportService.GetElementNames();
-            var plants = await _context.PlantSources.Select(ps => new SelectListItem
-            {
-                Value = ps.Id.ToString(),
-                Text = ps.PlantSourceName
-            }).ToListAsync();
-
-            var model = new ReportViewModel
-            {
-                ElementList = elementNames,
-                Plants = plants
-            };
-
-            return View(model);
-        }
-
-        [HttpGet]
         public async Task<IActionResult> Met()
-        {
-            var elementNames = _reportService.GetElementNames();
-            var plants = await _context.PlantSources.Select(ps => new SelectListItem
-            {
-                Value = ps.Id.ToString(),
-                Text = ps.PlantSourceName
-            }).ToListAsync();
-
-            var model = new ReportViewModel
-            {
-                ElementList = elementNames,
-                Plants = plants
-            };
-
-            return View(model);
-        }
-
-
-        [HttpGet]
-        public async Task<IActionResult> Daily()
         {
             var elementNames = _reportService.GetElementNames();
             var plants = await _context.PlantSources.Select(ps => new SelectListItem
@@ -232,6 +216,25 @@ namespace AsseyLabMgt.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Daily()
+        {
+            var elementNames = _reportService.GetElementNames();
+            var plants = await _context.PlantSources.Select(ps => new SelectListItem
+            {
+                Value = ps.Id.ToString(),
+                Text = ps.PlantSourceName
+            }).ToListAsync();
+
+            var model = new ReportViewModel
+            {
+                ElementList = elementNames,
+                Plants = plants
+            };
+
+            return View(model);
+        }
+
         [HttpPost]
         public async Task<IActionResult> GenerateDailyReport(ReportViewModel model, string reportType)
         {
@@ -265,7 +268,6 @@ namespace AsseyLabMgt.Controllers
                 return View("Daily", model);
             }
         }
-
 
     }
 }

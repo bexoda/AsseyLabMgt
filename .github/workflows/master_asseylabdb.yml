@@ -54,4 +54,4 @@ jobs:
           app-name: 'asseylabdb'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_795A281EA4884D52ADAEB4BC2B4A391B }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_1B0484487BB54D31843F3361731CEF8F }}

@@ -513,7 +513,7 @@ namespace AsseyLabMgt.Services
                                 // Add table rows and totals for each plant source
                                 foreach (var group in groupedResults)
                                 {
-                                    decimal[] plantTotals = new decimal[elements.Count];
+                                    int[] plantTotals = new int[elements.Count];
                                     _logger.LogInformation("Processing group for Plant Source: {PlantSource}", group.Key);
 
                                     foreach (var result in group)
@@ -526,7 +526,10 @@ namespace AsseyLabMgt.Services
                                         {
                                             var element = elements[i];
                                             var value = GetElementValue(result, element);
-                                            plantTotals[i] += value ?? 0;
+                                            if (value.HasValue)
+                                            {
+                                                plantTotals[i]++;
+                                            }
                                             table.Cell().Element(CellStyle).Text(value?.ToString("F2") ?? "0").FontSize(8);
                                         }
                                     }
@@ -537,7 +540,7 @@ namespace AsseyLabMgt.Services
                                     table.Cell().Element(CellStyle).Text("-").FontSize(8).Italic().Bold();
                                     foreach (var total in plantTotals)
                                     {
-                                        table.Cell().Element(CellStyle).Text(total.ToString("F2")).FontSize(8).Italic().Bold();
+                                        table.Cell().Element(CellStyle).Text(total.ToString()).FontSize(8).Italic().Bold();
                                     }
                                 }
                             });
@@ -566,6 +569,8 @@ namespace AsseyLabMgt.Services
                 throw;
             }
         }
+
+        // Utility function to get the value of the element from the LabResult
 
 
     }

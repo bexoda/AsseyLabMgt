@@ -4,7 +4,7 @@
     ViewData["Title"] = "Daily Report";
 }
 
-<h1>Reports</h1>
+<h1>Daily Reports</h1>
 
 <div class="row">
     <div class="col-md-6">
@@ -28,7 +28,7 @@
 </div>
 
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-6">
         <form asp-action="GenerateDailyReport" method="post" onsubmit="setHiddenFields(this)">
             <input type="hidden" name="reportType" value="DailyReport" />
             <input type="hidden" name="StartDate" />

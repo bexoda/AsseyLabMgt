@@ -123,113 +123,102 @@
                                             Statistics
                                         </p>
                                     </a>
-                                </li>
-                                <li class="nav-item has-treeview">
-                                    <a asp-controller="Reports" asp-action="Index" class="nav-link">
+                                </li> <li class="nav-item">
+                                     <a asp-controller="Reports" asp-action="Geology" class="nav-link">
                                         <i class="fa fa-file-excel"></i>
                                         <p>
-                                            Reports
-                                            <i class="right fa fa-angle-left"></i>
+                                            Geology Report
                                         </p>
                                     </a>
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item">
-                                            <a asp-controller="Reports" asp-action="Geology" class="nav-link">
-                                                <i class="fa fa-circle-o"></i>
-                                                <p>Geology Reports</p>
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a asp-controller="Reports" asp-action="Met" class="nav-link">
-                                                <i class="fa fa-circle-o"></i>
-                                                <p>Met Reports</p>
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a asp-controller="Reports" asp-action="Daily" class="nav-link">
-                                                <i class="fa fa-circle-o"></i>
-                                                <p>Daily Reports</p>
-                                            </a>
-                                        </li>
-                                    </ul>
+                                </li> <li class="nav-item">
+                                     <a asp-controller="Reports" asp-action="Met" class="nav-link">
+                                        <i class="fa fa-file-excel"></i>
+                                        <p>
+                                            Met Report
+                                        </p>
+                                    </a>
+                                </li> <li class="nav-item">
+                                    <a asp-controller="Reports" asp-action="Daily" class="nav-link">
+                                        <i class="fa fa-file-excel"></i>
+                                        <p>
+                                            Daily Report
+                                        </p>
+                                    </a>
                                 </li>
-
-
-
 
                             </ul>
                         </li>
                         @if (User.IsInRole("Admin"))
                         {
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon fas fa-cog"></i>
-                                    <p>
-                                        System Admin
-                                        <i class="fas fa-angle-left right"></i>
-                                    </p>
-                                </a>
-                                <ul class="nav nav-treeview">
-                                    <li class="nav-item">
-                                        <a asp-controller="Users" asp-action="Index" class="nav-link">
-                                            <i class="nav-icon fas fa-th"></i>
-                                            <p>
-                                                System Users
-                                            </p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a asp-controller="Staffs" asp-action="Index" class="nav-link">
-                                            <i class="nav-icon fas fa-th"></i>
-                                            <p>
-                                                Staff
-                                            </p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a asp-controller="Roles" asp-action="Index" class="nav-link">
-                                            <i class="nav-icon fas fa-th"></i>
-                                            <p>
-                                                Roles
-                                            </p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a asp-controller="Clients" asp-action="Index" class="nav-link">
-                                            <i class="nav-icon fas fa-th"></i>
-                                            <p>
-                                                Clients
-                                            </p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a asp-controller="Departments" asp-action="Index" class="nav-link">
-                                            <i class="nav-icon fas fa-th"></i>
-                                            <p>
-                                                Departments
-                                            </p>
-                                        </a>
-                                    </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">
+                                        <i class="nav-icon fas fa-cog"></i>
+                                        <p>
+                                            System Admin
+                                            <i class="fas fa-angle-left right"></i>
+                                        </p>
+                                    </a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item">
+                                            <a asp-controller="Users" asp-action="Index" class="nav-link">
+                                                <i class="nav-icon fas fa-th"></i>
+                                                <p>
+                                                    System Users
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a asp-controller="Staffs" asp-action="Index" class="nav-link">
+                                                <i class="nav-icon fas fa-th"></i>
+                                                <p>
+                                                    Staff
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a asp-controller="Roles" asp-action="Index" class="nav-link">
+                                                <i class="nav-icon fas fa-th"></i>
+                                                <p>
+                                                    Roles
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a asp-controller="Clients" asp-action="Index" class="nav-link">
+                                                <i class="nav-icon fas fa-th"></i>
+                                                <p>
+                                                    Clients
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a asp-controller="Departments" asp-action="Index" class="nav-link">
+                                                <i class="nav-icon fas fa-th"></i>
+                                                <p>
+                                                    Departments
+                                                </p>
+                                            </a>
+                                        </li>
 
-                                    <li class="nav-item">
-                                        <a asp-controller="Designations" asp-action="Index" class="nav-link">
-                                            <i class="nav-icon fas fa-th"></i>
-                                            <p>
-                                                Designation
-                                            </p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a asp-controller="PlantSources" asp-action="Index" class="nav-link">
-                                            <i class="nav-icon fas fa-th"></i>
-                                            <p>
-                                                Plant Sources
-                                            </p>
-                                        </a>
-                                    </li>
+                                        <li class="nav-item">
+                                            <a asp-controller="Designations" asp-action="Index" class="nav-link">
+                                                <i class="nav-icon fas fa-th"></i>
+                                                <p>
+                                                    Designation
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a asp-controller="PlantSources" asp-action="Index" class="nav-link">
+                                                <i class="nav-icon fas fa-th"></i>
+                                                <p>
+                                                    Plant Sources
+                                                </p>
+                                            </a>
+                                        </li>
 
-                                </ul>
-                            </li>
+                                    </ul>
+                                </li>
                         }
                     </ul>
                 </nav>

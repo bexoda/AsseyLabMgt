@@ -113,14 +113,23 @@ namespace AsseyLabMgt.Controllers
                     TempData["ErrorMessage"] = "Error processing file: " + ex.Message;
                 }
             }
+            else if (labRequest.LabResults != null && labRequest.LabResults.Any())
+            {
+                // If lab results are manually entered, process them
+                
+                HttpContext.Session.SetString("LabResults", JsonConvert.SerializeObject(labRequest.LabResults)); // Store the results temporarily
+                HttpContext.Session.SetString("LabRequest", JsonConvert.SerializeObject(labRequest)); // Store the LabRequest temporarily
+                return RedirectToAction("Confirm"); // Redirect to a confirmation view
+            }
             else
             {
-                TempData["ErrorMessage"] = "Please upload an Excel file.";
+                TempData["ErrorMessage"] = "Please upload an Excel file or enter lab results manually.";
             }
 
             PopulateViewData(labRequest);
             return View(labRequest);
         }
+
 
         private async Task<List<LabResults>> ProcessExcelFileAsync(IFormFile excelFile, LabRequest labRequest)
         {

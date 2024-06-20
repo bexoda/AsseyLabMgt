@@ -9,7 +9,7 @@
 <h4>Create New Lab Request</h4>
 <hr />
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-11">
         <form asp-action="Create" enctype="multipart/form-data" id="createForm">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -69,17 +69,15 @@
                     <div class="form-group">
                         <label asp-for="WeighedById" class="control-label"></label>
                         <select asp-for="WeighedById" class="form-control" asp-items="ViewBag.WeighedById"></select>
-                        @* <select asp-for="WeighedById" class="form-control select2 select2-danger" asp-items="ViewBag.WeighedById"></select> *@
                     </div>
                     <div class="form-group">
                         <label asp-for="DigestedById" class="control-label"></label>
                         <select asp-for="DigestedById" class="form-control" asp-items="ViewBag.DigestedById"></select>
-                        @* <select asp-for="DigestedById" class="form-control select2 select2-danger" asp-items="ViewBag.DigestedById"></select> *@
                     </div>
                     <div class="form-group">
                         <label asp-for="TitratedById" class="control-label"></label>
                         <select asp-for="TitratedById" class="form-control" asp-items="ViewBag.TitratedById"></select>
-                        @* <select asp-for="TitratedById" class="form-control select2 select2-danger" asp-items="ViewBag.TitratedById"></select> *@
+
                     </div>
                     <div class="form-group">
                         <label asp-for="DateReported" class="control-label"></label>
@@ -102,6 +100,54 @@
                 </div>
             </div>
 
+
+            <h5>Lab Results</h5>
+            <table class="table" id="labResultsTable">
+                <thead>
+                    <tr>
+                        <th>Sample ID</th>
+                        <th>Mn</th>
+                        <th>Sol_Mn</th>
+                        <th>Fe</th>
+                        <th>B</th>
+                        <th>MnO2</th>
+                        <th>SiO2</th>
+                        <th>Al2O3</th>
+                        <th>MgO</th>
+                        <th>CaO</th>
+                        <th>Au</th>
+                        <th>H2O</th>
+                        <th>Mg</th>
+                        <th>P</th>
+                        <th>As</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" name="LabResults[0].SampleId" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].Mn" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].Sol_Mn" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].Fe" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].B" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].MnO2" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].SiO2" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].Al2O3" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].MgO" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].CaO" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].Au" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].H2O" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].Mg" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].P" class="form-control" /></td>
+                        <td><input type="number" step="any" min="0" name="LabResults[0].As" class="form-control" /></td>
+                        <td><button type="button" class="btn btn-danger remove-row">Remove</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" class="btn btn-success" id="addRowButton">Add Row</button>
+            <br />
+            <br />
+            <br />
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" id="submitButton" />
             </div>
@@ -123,12 +169,60 @@
     }
     <script>
         $(function () {
-            //Initialize Select2 Elements
-            $('.select2').select2()
-        });
-        document.getElementById('createForm').addEventListener('submit', function (event) {
-            document.getElementById('loader').style.display = 'block';
-            document.getElementById('submitButton').disabled = true;
+            // Initialize Select2 Elements
+            $('.select2').select2();
+
+            // Add event listener for form submission
+            // document.getElementById('createForm').addEventListener('submit', function (event) {
+            //     document.getElementById('loader').style.display = 'block';
+            //     document.getElementById('submitButton').disabled = true;
+            // });
+
+            // // Re-enable submit button and hide loader if form has errors
+            // function checkFormValidity() {
+            //     const form = document.getElementById('createForm');
+            //     if (!form.checkValidity()) {
+            //         document.getElementById('loader').style.display = 'none';
+            //         document.getElementById('submitButton').disabled = false;
+            //     }
+            // }
+
+            // // Monitor changes in the form to re-enable the submit button if valid
+            // $('#createForm').on('input change', function () {
+            //     checkFormValidity();
+            // });
+
+            // Initialize variables
+            let rowIndex = 1;
+
+            // Function to add a new row to the lab results table
+            $('#addRowButton').click(function () {
+                let newRow = `<tr>
+                                                    <td><input type="text" name="LabResults[${rowIndex}].SampleId" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].Mn" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].Sol_Mn" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].Fe" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].B" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].MnO2" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].SiO2" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].Al2O3" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].MgO" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].CaO" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].Au" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].H2O" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].Mg" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].P" class="form-control" /></td>
+                                                    <td><input type="number" step="any" min="0" name="LabResults[${rowIndex}].As" class="form-control" /></td>
+                                                    <td><button type="button" class="btn btn-danger remove-row">Remove</button></td>
+                                                </tr>`;
+                $('#labResultsTable tbody').append(newRow);
+                rowIndex++;
+            });
+
+            // Function to remove a row from the lab results table
+            $(document).on('click', '.remove-row', function () {
+                $(this).closest('tr').remove();
+            });
         });
     </script>
 }
